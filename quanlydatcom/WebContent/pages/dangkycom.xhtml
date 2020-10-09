@@ -1,0 +1,590 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+<h:head>
+	<title>LIXCO</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<h:outputStylesheet name="css/style.css" />
+	<h:outputScript src="js/jquery-1.8.2.min.js" />
+	<h:outputStylesheet name="css/animation.css" />
+	<style>
+.ui-dialog {
+	overflow: scroll !important;
+	max-height: 100%;
+}
+
+.btnDelete {
+	background: red !important;
+	color: white !important;
+	text-shadow: none !important;
+	padding: 3px !important;
+	border-radius: 0px;
+}
+
+.thai {
+	max-width: 300px;
+	max-height: 300px;
+	overflow: hidden;
+	margin: 0 auto;
+}
+
+.thai img {
+	transition: 0.5s all ease-in-out;
+}
+
+.thai:hover img {
+	height: 200px !important;
+	transform: scale(3.0);
+}
+
+@media ( max-width : 768px) {
+	#headeridRemove {
+		display: none;
+		opacity: 0;
+	}
+	#detail:fieldsetThoiGian {
+		width: 300px;
+	}
+	body {
+		min-width: 300px;
+	}
+	.divheader {
+		min-width: 300px;
+	}
+	.divheader .bgheader {
+		min-width: 300px;
+	}
+}
+
+@media ( min-width : 768px) {
+	.divheader {
+		height: 150px;
+		min-width: 1280px;
+		background: white;
+		margin-top: 5px;
+	}
+	.divheader .bgheader {
+		width: 1230px;
+		margin: auto;
+		padding-top: 6px
+	}
+}
+</style>
+	<script>
+	//<![CDATA[
+	PrimeFaces.locales['vi'] = {     closeText: 'Tắt', prevText: 'Tháng trước', nextText: 'Tháng sau', monthNames: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'], monthNamesShort: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12' ], dayNames: ['Chúa Nhựt', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'], dayNamesShort: ['CN', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'], dayNamesMin: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'], weekHeader: 'Tuần', firstDay: 1, isRTL: false, showMonthAfterYear: false, yearSuffix:'', timeOnlyTitle: 'Chọn giờ', timeText: 'Giờ', hourText: 'Giờ', minuteText: 'Phút', secondText: 'Giây', currentText: 'Giờ hiện hành', ampm: false, month: 'Tháng', week: 'Tuần', day: 'Ngày', allDayText: 'Cả ngày' };
+	
+
+	function cleanupTooltips(){
+	    $('.ui-tooltip').each(function(index, elem){
+	        $(elem).hide();
+	    });
+	}
+	// Xuat report, excel 
+	function openreport(idp) {
+		document.getElementById(idp).click();
+	}
+	function openexcel(idp) {
+		document.getElementById(idp).click();
+	}
+	
+	var showHeader=#{applicationBean.cf.showHeader}
+	$(document).ready(function(){
+		if(!showHeader){
+			addclass();
+		}else{
+			removeclass();
+		}
+	});
+
+	function addclass(){
+			$('#headerid').addClass('hidenHeader');
+			$( '.hidenbutton' ).css( "display","none" );
+			$( '.showbutton' ).css( "display","block" );
+
+	}
+	function removeclass(){
+		$('div').removeClass('hidenHeader');
+		$( '.hidenbutton' ).css( "display","block" );
+		$( '.showbutton' ).css( "display","none" );
+
+	}
+	
+	function customFilter(itemLabel, filterValue) {
+		itemLabel_create = itemLabel.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a").replace(/\ /g, '-').replace(/đ/g, "d").replace(/đ/g, "d").replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y").replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u").replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ.+/g,"o").replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ.+/g, "e").replace(/ì|í|ị|ỉ|ĩ/g,"i");
+		filterValue_create = filterValue.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a").replace(/\ /g, '-').replace(/đ/g, "d").replace(/đ/g, "d").replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y").replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u").replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ.+/g,"o").replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ.+/g, "e").replace(/ì|í|ị|ỉ|ĩ/g,"i");
+		 var result = itemLabel_create.search(filterValue_create);
+		 if(result==-1){
+			return false;
+		 }else{
+			return true;
+		}
+	}
+
+
+	
+
+	$(document).on('keydown', 'form input[type="text"]', function(e) {
+
+		// Viet chu hoa cac o nhap co class upper
+		 $('.upper').keyup(function() {
+		        this.value = this.value.toUpperCase();
+		    });
+
+		  //Nhay o input tiep theo khi Enter va Shift+Enter
+		var self = $(this)
+		  , form = self.parents('form:eq(0)')
+		  , focusable
+		  , next
+		  , prev
+		  ;
+		if (e.shiftKey) {
+		 if (e.keyCode == 13) {
+		     focusable =   form.find('input,a,select,button,textarea').filter(':visible');
+		     prev = focusable.eq(focusable.index(this)-1); 
+
+		     if (prev.length) {
+		        prev.focus();
+		        next.select();
+		     } else {
+		        form.submit();
+		    }
+		     return false;
+		  }
+		}
+		  else
+		if (e.keyCode == 13) {
+		    focusable = form.find('input,a,select,button,textarea').filter(':visible');
+		    next = focusable.eq(focusable.index(this)+1);
+		    if (next.length) {
+		        next.focus();
+		        next.select();
+		    } else {
+		        form.submit();
+		    }
+		    return false;
+		}
+		
+		
+ 	});
+	//]]>
+
+		
+		
+	</script>
+</h:head>
+<h:body>
+
+	<p:ajaxStatus
+		style="display:block;margin-top: 10%;z-index: 500; margin-left: 47%; position: absolute;"
+		onstart="PF('progressPanel').show();"
+		oncomplete="cleanupTooltips();PF('progressPanel').close();"
+		id="ajaxStatusPanel">
+	</p:ajaxStatus>
+	<style>
+#primefacesmessagedlg {
+	z-index: 2019 !important;
+}
+
+.progressPanel {
+	padding: 0px;
+}
+
+.progressPanel .ui-panel-content {
+	padding: 0px;
+}
+
+.progressPanel .ui-progressbar.ui-widget-content {
+	margin-bottom: 0px;
+}
+
+.sldapan label {
+	width: 90%;
+	margin-right: 0px !important;
+}
+
+.sldapan {
+	width: 100%;
+	margin: 0px;
+}
+
+.sldapan td {
+	padding: 0px;
+	text-align: left;
+}
+
+.lnumber {
+	background: #009688;
+	padding: 5px 10px;
+	color: white;
+	border-radius: 30px;
+	margin-right: 10px;
+}
+
+.lcauhoi {
+	font-size: 1.2em !important;
+	font-weight: bold;
+	color: #009688;
+}
+
+.diemdanhgia {
+	font-size: 1.1em !important;
+	text-decoration: underline !important;
+	color: #0e8bee !important;
+}
+
+.animated .ui-progressbar-value {
+	background-image: url("#{resource['images/pbar-ani.gif']}");
+}
+</style>
+	<h:form>
+		<p:dialog widgetVar="thongbao" styleClass="noticedialog"
+			header="Thông báo" style="height:10px" resizable="false">
+			<h:outputText value="Không có dữ liệu phát sinh!"
+				style="color: red;font-size: 14px;" />
+			<br />
+			<p:separator />
+			<p:commandButton value="OK" style="margin-left:50px"
+				onclick="PF('thongbao').hide();" styleClass="ui-confirmdialog-yes"
+				icon="ui-icon-check" />
+		</p:dialog>
+	</h:form>
+	<h:form style="display:none;">
+		<p:confirmDialog header="Thông báo" global="true" showEffect="fade"
+			hideEffect="fade" styleClass="confirmDialog" closeOnEscape="true"
+			message="Bạn có chắc muốn xoá không?">
+			<p:commandButton value="OK" type="button"
+				styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+			<p:commandButton value="Cancel" type="button"
+				styleClass="ui-confirmdialog-no " icon="ui-icon-close" />
+		</p:confirmDialog>
+	</h:form>
+	<div>
+		<div class="divheader" id="headeridRemove">
+			<div class="bgheader">
+				<div class="wrapper">
+					<div class="logo">
+						<p:commandLink action="#{applicationBean.logoutHome()}">
+							<img src="#{request.contextPath}/resources/gfx/lixco_logo.png"
+								style="width: 100px; height: 50px" />
+							<span
+								style="color: rgba(128, 128, 128, 0.27); font-weight: bold; font-size: 12px;">
+								#{sessionScope.database} </span>
+						</p:commandLink>
+					</div>
+					<div class="main_menu">
+						<ul>
+							<li><a href="#"><i class="fa fa-user" />#{sessionScope.account.userName},
+									Hi</a>
+								<ul>
+									<li style="height: 50px; padding-top: 5px;"><p:commandLink
+											action="#{applicationBean.getAccountFormSession}"
+											update=":thongtintaikhoan"
+											oncomplete="PF('thongtintaikhoan').show();">
+											<i class="fa fa-user"
+												style="height: 50px; width: 40px; float: left; font-size: 35px; text-align: center" />
+											<div
+												style="float: right; width: 160px; margin-right: 10px; text-align: right">
+												<span>#{sessionScope.account.member.name}</span><br /> <span
+													style="font-size: 11px;">Last login:
+													#{applicationBean.hourLogin}</span>
+											</div>
+										</p:commandLink></li>
+									<div class="divclear" />
+									<li style="height: 30px; padding-top: 5px;"><p:commandLink
+											onclick="PF('doimatkhau').show();">
+											<i class="fa fa-key"
+												style="height: 30px; width: 40px; font-size: 20px; text-align: center" />
+											<span>Đổi mật khẩu</span>
+										</p:commandLink></li>
+									<li style="height: 30px; padding-top: 5px;"><p:commandLink
+											id="logoutid" action="#{applicationBean.logout()}">
+											<i class="fa fa-sign-out"
+												style="height: 30px; width: 40px; font-size: 20px; text-align: center" />
+											<span style="font-size: 16px">Đăng xuất</span>
+										</p:commandLink></li>
+								</ul></li>
+							<li class="space" />
+							<li><h:form id="notice">
+									<p:poll interval="300" update=":notice"
+										listener="#{applicationBean.checkNotice}"
+										onstart="document.getElementById('ajaxStatusPanel').style.display='none';" />
+									<p:commandLink update=":danhsachthongbao,:notice"
+										oncomplete="PF('thongbaohethong').show();"
+										action="#{applicationBean.showNoticeSystem}">
+										<i
+											class="fa fa-bell #{sessionScope.account.notice==true?'myanimation':''} "></i>Thông báo</p:commandLink>
+								</h:form></li>
+							<li class="space" />
+							<li><p:commandLink
+									action="#{applicationBean.setSettingPerson}"
+									oncomplete="PF('caidathethong').show();" update=":caidat">
+									<i class="fa fa-cogs"></i>Cài đặt</p:commandLink></li>
+						</ul>
+						<div class="clear"></div>
+					</div>
+					<div style="clear: both;">
+						<h1>Quản lý đăng ký cơm</h1>
+						<h:form id="showheaderform"
+							style="margin: auto; margin-top: -20px;width: 50px;">
+							<p:commandButton styleClass="hidenbutton" value=""
+								action="#{applicationBean.addclass()}" process="@this">
+							</p:commandButton>
+							<p:commandButton styleClass="showbutton" value=""
+								action="#{applicationBean.removeclass()}" process="@this">
+							</p:commandButton>
+						</h:form>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<div class="menuheader">
+			<div style="max-width: 1230px; margin: auto;">
+				<h:form id="formmenutitlebar">
+					<p:sticky target="tb" />
+					<p:menubar id="tb" model="#{menuBean.model}" styleClass="menubar" />
+				</h:form>
+				<h:form id="messagesbar">
+					<p:sticky target="thongbao" />
+					<p:messages id="thongbao" showDetail="true" closable="true">
+						<!-- 						<p:autoUpdate /> -->
+					</p:messages>
+				</h:form>
+				<h:form id="messages">
+					<p:growl life="5000" showDetail="true">
+					</p:growl>
+				</h:form>
+			</div>
+			<h:form id="trade-order-form"
+				style="width: 600px; margin: auto;height:4px">
+				<p:panel widgetVar="progressPanel" visible="false"
+					styleClass="progressPanel" style="border:none; " closable="true"
+					toggleable="true">
+					<p:progressBar style="height:4px;" mode="indeterminate" />
+				</p:panel>
+			</h:form>
+			<div
+				style="max-width: 1190px; height: auto; margin: auto; margin-top: 10px; background: white; border-radius: 5px; padding: 20px">
+				<h:form id="detail">
+					<p:growl id="growlXoaMonAn" showDetail="true" sticky="false" />
+					<p:fieldset>
+						<center>
+							<p:fieldset id="fieldsetThoiGian" legend="Thời gian*"
+								styleClass="noneformatfs"
+								style="width:50%;align:center; height:155px">
+								<div class="ui-g" style="width: 100%">
+									<div class="ui-g-2">
+										<p:outputLabel value="Tuần:" style="float:left" />
+									</div>
+									<div class="ui-g-4">
+										<p:spinner style="width:90%;float:left" size="1" min="1"
+											value="#{dangKyComBean.week}">
+											<p:ajax listener="#{dangKyComBean.ajax_setDate()}"
+												update="startDate,endDate" process="@this" />
+										</p:spinner>
+									</div>
+									<div class="ui-g-2">
+										<p:outputLabel style="float:right" value=" Năm:" />
+									</div>
+									<div class="ui-g-4">
+										<p:spinner style="width:90%;float:left" size="2" min="1990"
+											value="#{dangKyComBean.yearOfWeek}">
+											<p:ajax listener="#{dangKyComBean.ajax_setDate()}"
+												update="startDate,endDate" process="@this" />
+										</p:spinner>
+									</div>
+								</div>
+								<div class="ui-g" style="width: 100%">
+									<div class="ui-g-2">
+										<p:outputLabel style="float:left" value="Từ ngày: " />
+									</div>
+									<div class="ui-g-4">
+										<p:calendar styleClass="stwidth" locale="vi"
+											value="#{dangKyComBean.startDate}" id="startDate"
+											pattern="#{applicationBean.cf.formatDate}"
+											showButtonPanel="true" navigator="true"
+											mask="#{applicationBean.cf.maskDate}" />
+									</div>
+									<div class="ui-g-2">
+										<p:outputLabel style="float:right" value="Đến ngày: " />
+									</div>
+									<div class="ui-g-4">
+										<p:calendar styleClass="stwidth"
+											value="#{dangKyComBean.endDate}" locale="vi"
+											pattern="#{applicationBean.cf.formatDate}" id="endDate"
+											showButtonPanel="true" navigator="true"
+											mask="#{applicationBean.cf.maskDate}" />
+									</div>
+								</div>
+								<h:panelGrid columns="3" styleClass="noneformat" cellspacing="5"
+									columnClasses="w50,w50" style="width:100%">
+									<p:commandButton styleClass="btsearch"
+										style="margin-top:20px;float:right" type="submit"
+										value="Tìm kiếm" process="@form"
+										action="#{dangKyComBean.findData()}" update="dtOrderFood"
+										icon="ui-icon-search" />
+									<p:commandButton style="float:left;margin-top:20px"
+										styleClass="btsave" type="submit" value="Chi tiết (PDF)"
+										ajax="false"
+										actionListener="#{dangKyComBean.showReportFoodPDF()}"
+										onclick="this.form.target='_blank'" />
+								</h:panelGrid>
+							</p:fieldset>
+						</center>
+					</p:fieldset>
+					<p:fieldset>
+						<center>
+							<p:dataTable value="#{dangKyComBean.orderFoods}"
+								rowKey="#{item.id}" id="dtOrderFood" var="item"
+								scrollable="true" scrollHeight="800" style="max-width: 800px">
+
+								<p:column headerText="Ngày" width="15">
+									<center>
+										<h:outputText value="#{item.registration_date}">
+											<f:convertDateTime type="date" pattern="dd-MM-yyyy" />
+										</h:outputText>
+									</center>
+								</p:column>
+								<p:column headerText="..." width="15">
+									<center>
+										<p:commandLink value="Chi tiết"
+											action="#{dangKyComBean.handleDataDialogDetail(item)}"
+											update=":formDetail:dtFoodShifts1,outputShowDate"
+											style="color: blue;font-style: italic;text-decoration: underline;" />
+									</center>
+								</p:column>
+								<f:facet name="footer">
+									<div style="clear: both;" />
+								</f:facet>
+							</p:dataTable>
+						</center>
+					</p:fieldset>
+					<br />
+				</h:form>
+				<!-- DIALOG HANDLE SHOW CHI TIET -->
+				<p:dialog widgetVar="wdvDialogShowDetail" modal="true"
+					style="max-width: 800px;" resizable="false" closeOnEscape="true"
+					header="Chi tiết" id="idDialogShowDetail">
+					<center>
+						<h:outputText value="#{dangKyComBean.dateItemSelected}"
+							id="outputShowDate" style="font-size:25px;font-weight:bold">
+							<f:convertDateTime type="date" pattern="dd-MM-yyyy" />
+						</h:outputText>
+					</center>
+					<h:form id="formDetail" style="margin-top:10px">
+						<p:growl id="growlDetail" showDetail="true" sticky="false" />
+						<p:dataTable var="item" value="#{dangKyComBean.ofsByDate}"
+							rowKey="#{item.id}" id="dtFoodShifts1" scrollHeight="370"
+							style="height:300px">
+							<p:column headerText="Ca làm việc">
+								<center>
+									<h:outputText value="#{item.food_by_day.shifts.name}" />
+								</center>
+							</p:column>
+							<p:column headerText="Tên món">
+								<center>
+									<h:outputText value="#{item.food_by_day.category_food.name}" />
+								</center>
+							</p:column>
+							<p:column headerText="Hình ảnh">
+								<center>
+									<img
+										src="data:image/jpg;base64, #{item.food_by_day.category_food.imageString()}"
+										style="max-width: 90px; max-height: 90px; object-fit: contain;" />
+								</center>
+							</p:column>
+							<p:column headerText="">
+								<center>
+									<p:commandLink value="Xóa"
+										action="#{dangKyComBean.deleteOrderFood(item)}"
+										update=":formDetail:dtFoodShifts1,:detail:growlXoaMonAn"
+										style="color: red;font-style: italic;text-decoration: underline;" />
+								</center>
+							</p:column>
+						</p:dataTable>
+					</h:form>
+					<f:facet name="footer">
+						<center>
+							<p:commandButton oncomplete="PF('wdvDialogChooseFood').show();"
+								action="#{dangKyComBean.ajaxHandleChonMonTapped()}"
+								process="@this" value="Đặt món ăn (theo ca)" styleClass="btsave"
+								style="text-decoration: underline;width:30%"
+								update=":formChooseFood" />
+							<p:commandButton value="Đóng"
+								action="#{dangKyComBean.closeDialogDetail()}" style="width:30%;"
+								styleClass="btnDelete" />
+						</center>
+					</f:facet>
+				</p:dialog>
+				<!-- DIALOG HANDLE CHON MON AN -->
+				<p:dialog widgetVar="wdvDialogChooseFood" modal="true"
+					style="max-width: 800px;" height="600" resizable="false"
+					closeOnEscape="true" header="Chọn món ăn" id="idDialogChooseFood">
+					<h:form id="formChooseFood">
+						<center>
+							<h:outputText value="Chọn ca: "
+								style="font-weight:bold;margin-right:5px" />
+							<p:selectOneMenu value="#{dangKyComBean.shiftsSelected}"
+								converter="abstractConverter" effect="fade" var="t" id="kdgtc"
+								style="width:150px;" filter="true" filterMatchMode="custom"
+								filterFunction="customFilter">
+								<p:ajax process="@this"
+									listener="#{dangKyComBean.ajaxHandleShowFoodByShifts()}"
+									update=":formChooseFood:dtFoodShifts1,:formChooseFood:kdgtc" />
+								<f:selectItems value="#{dangKyComBean.allShift}" var="loop"
+									itemLabel="#{loop.name}" itemValue="#{loop}" />
+								<p:column>
+									<h:outputText value="#{t.name}" />
+								</p:column>
+							</p:selectOneMenu>
+						</center>
+						<br />
+						<p:dataTable var="item" value="#{dangKyComBean.foodsShifts}"
+							selectionMode="single" selection="#{dangKyComBean.food1Selected}"
+							rowKey="#{item.id}" id="dtFoodShifts1" scrollHeight="370"
+							style="height:500px;margin-top:20px">
+							<p:ajax event="rowSelect" process="@this"></p:ajax>
+							<p:column headerText="Tên món ăn" width="15px"
+								style="text-align:center">
+								<h:outputText value="#{item.category_food.name}" />
+							</p:column>
+							<p:column headerText="Hình ảnh" width="15px"
+								style="text-align:center">
+								<div class="thai">
+									<img
+										src="data:image/jpg;base64, #{item.category_food.imageString()}"
+										style="width: 100px; height: 100px; object-fit: contain;" />
+								</div>
+
+							</p:column>
+
+						</p:dataTable>
+					</h:form>
+					<f:facet name="footer">
+						<center>
+							<p:commandButton
+								action="#{dangKyComBean.createOrUpdateFoodShifts}"
+								oncomplete="PF('wdvDialogChooseFood').hide();" process="@this"
+								value="Cập nhật" styleClass="btsave"
+								style="text-decoration: underline;width:20%"
+								update=":detail:dtOrderFood,:formDetail:growlDetail,:formDetail:dtFoodShifts1" />
+							<p:commandButton value="Đóng"
+								action="#{dangKyComBean.closeDialogChonMon()}"
+								style="width:20%;" styleClass="btnDelete" />
+						</center>
+					</f:facet>
+				</p:dialog>
+				<ui:include src="/dialog/Thongbaohethong.xhtml" />
+				<ui:include src="/dialog/Caidathethong.xhtml" />
+				<ui:include src="/dialog/Thongtintaikhoan.xhtml" />
+				<ui:include src="/dialog/Doimatkhau.xhtml" />
+			</div>
+		</div>
+	</div>
+</h:body>
+</html>

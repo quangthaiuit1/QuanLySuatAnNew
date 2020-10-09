@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:h="http://java.sun.com/jsf/html" template="/pages/home.xhtml">
+
+	<ui:define name="content">
+		<style>
+.sldapan label {
+	width: 90%;
+	margin-right: 0px !important;
+}
+
+.sldapan {
+	width: 100%;
+	margin: 0px;
+}
+
+.sldapan td {
+	padding: 0px;
+	text-align: left;
+}
+
+.lnumber {
+	background: #009688;
+	padding: 5px 10px;
+	color: white;
+	border-radius: 30px;
+	margin-right: 10px;
+}
+
+.lcauhoi {
+	font-size: 1.2em !important;
+	font-weight: bold;
+	color: #009688;
+}
+
+.diemdanhgia {
+	font-size: 1.1em !important;
+	text-decoration: underline !important;
+	color: #0e8bee !important;
+}
+
+.animated .ui-progressbar-value {
+	background-image: url("#{resource['images/pbar-ani.gif']}");
+}
+</style>
+		<h:form id="suatantangca">
+			<p:growl id="growlSuatAnTangCa" showDetail="true" sticky="false" />
+			<p:panel style="float:right; border:0px;background:none;">
+				<h:panelGrid id="mainGrid" columns="6"
+					style="float:left; margin-bottom:5px">
+					<h:panelGrid columns="2" style="width:100%;text-align:center"
+						cellspacing="10">
+						<p:outputLabel value="Ngày:" />
+						<p:calendar styleClass="stwidth" locale="vi"
+							value="#{suatAnTangCaBean.dateSearch}" id="dateSearch"
+							pattern="#{applicationBean.cf.formatDate}" showButtonPanel="true"
+							navigator="true" mask="#{applicationBean.cf.maskDate}">
+							<p:ajax process="@this" />
+						</p:calendar>
+					</h:panelGrid>
+					<h:panelGrid columns="2" style="width:100%" cellspacing="10">
+						<p:selectOneMenu value="#{suatAnTangCaBean.shiftsSelected}"
+							converter="abstractConverter" effect="fade" var="t"
+							style="width:150px;" id="selectCa" filter="true"
+							filterMatchMode="custom" filterFunction="customFilter">
+							<f:selectItems value="#{suatAnTangCaBean.allShifts}" var="item"
+								itemLabel="#{item.name}" itemValue="#{item}" />
+							<p:column>
+								<h:outputText value="#{t.name}" escape="false" />
+							</p:column>
+						</p:selectOneMenu>
+					</h:panelGrid>
+					<h:panelGrid columns="2" style="width:100%" cellspacing="10">
+						<p:selectOneMenu value="#{suatAnTangCaBean.departmentSearch}"
+							converter="abstractConverter" effect="fade" var="t"
+							style="width:150px;" id="iddeps" filter="true"
+							filterMatchMode="custom" filterFunction="customFilter">
+							<f:selectItems value="#{suatAnTangCaBean.departmentSearchs}"
+								var="item" itemLabel="#{item.name}" itemValue="#{item}" />
+							<p:column>
+								<h:outputText value="#{t.code}" />
+							</p:column>
+							<p:column>
+								<h:outputText value="#{t.showAllNameDepart()}" escape="false" />
+							</p:column>
+						</p:selectOneMenu>
+					</h:panelGrid>
+					<p:commandButton value="Tìm" style="float:right;"
+						styleClass="btsearch" icon="ui-icon-search" update="dtSuatTangCa"
+						process="@form" oncomplete="PF('dtlistemployee').clearFilters()"
+						actionListener="#{suatAnTangCaBean.searchItem()}" />
+				</h:panelGrid>
+			</p:panel>
+			<div style="clear: both" />
+			<p:dataTable var="item" widgetVar="dtlistemployee"
+				value="#{suatAnTangCaBean.employeesThai}" paginator="true" rows="10"
+				rowsPerPageTemplate="10,25,50" paginatorPosition="bottom"
+				scrollable="true" id="dtSuatTangCa"
+				filteredValue="#{suatAnTangCaBean.employeesThaiFilters}">
+				<f:facet name="header">
+					<p:commandButton action="#{suatAnTangCaBean.saveOrUpdate()}"
+						value="Lưu/cập nhật" style="float:right" icon="ui-icon-update"
+						styleClass="btnWarning"
+						update="dtSuatTangCa,:suatantangca:growlSuatAnTangCa"
+						id="btnUpdateSuatTangCa" />
+					<div style="clear: both;" />
+				</f:facet>
+				<p:column headerText="Đã duyệt" style="width:25px;text-align:center">
+					<p:selectBooleanCheckbox value="#{item.select}"
+						disabled="#{suatAnTangCaBean.daDuyetSuatAnView}" />
+				</p:column>
+				<p:column headerText="Mã nhân viên"
+					style="width:100px;text-align:center">
+					<h:outputText value="#{item.employeeCode}" />
+				</p:column>
+				<p:column headerText="Tên nhân viên" filterBy="#{item.employeeName}"
+					filterFunction="#{abstractCustomFilter.filterByText}"
+					style="width:200px;text-align:center">
+					<h:outputText value="#{item.employeeName}" />
+				</p:column>
+			</p:dataTable>
+		</h:form>
+	</ui:define>
+</ui:composition>
