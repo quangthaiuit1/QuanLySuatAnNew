@@ -57,18 +57,18 @@
 						cellspacing="10">
 						<p:outputLabel value="Ngày:" />
 						<p:calendar styleClass="stwidth" locale="vi"
-							value="#{suatAnTangCaBean.dateSearch}" id="dateSearch"
+							value="#{duyetSuatAnTangCa.dateSearch}" id="dateSearch"
 							pattern="#{applicationBean.cf.formatDate}" showButtonPanel="true"
 							navigator="true" mask="#{applicationBean.cf.maskDate}">
 							<p:ajax process="@this" />
 						</p:calendar>
 					</h:panelGrid>
 					<h:panelGrid columns="2" style="width:100%" cellspacing="10">
-						<p:selectOneMenu value="#{suatAnTangCaBean.shiftsSelected}"
+						<p:selectOneMenu value="#{duyetSuatAnTangCa.shiftsSelected}"
 							converter="abstractConverter" effect="fade" var="t"
 							style="width:150px;" id="selectCa" filter="true"
 							filterMatchMode="custom" filterFunction="customFilter">
-							<f:selectItems value="#{suatAnTangCaBean.allShifts}" var="item"
+							<f:selectItems value="#{duyetSuatAnTangCa.allShifts}" var="item"
 								itemLabel="#{item.name}" itemValue="#{item}" />
 							<p:column>
 								<h:outputText value="#{t.name}" escape="false" />
@@ -76,7 +76,7 @@
 						</p:selectOneMenu>
 					</h:panelGrid>
 					<h:panelGrid columns="2" style="width:100%" cellspacing="10">
-						<p:selectOneMenu value="#{suatAnTangCaBean.departmentSearch}"
+						<p:selectOneMenu value="#{duyetSuatAnTangCa.departmentSearch}"
 							converter="abstractConverter" effect="fade" var="t"
 							style="width:150px;" id="iddeps" filter="true"
 							filterMatchMode="custom" filterFunction="customFilter">
@@ -91,32 +91,36 @@
 						</p:selectOneMenu>
 					</h:panelGrid>
 					<p:commandButton value="Tìm" style="float:right;"
-						icon="ui-icon-search" update="dtSuatTangCaTP" process="@form"
-						oncomplete="PF('dtlistemployeeTP').clearFilters()"
-						actionListener="#{suatAnTangCaBean.searchItem()}" />
+						icon="ui-icon-search" update="dtSuatTangCaTP1" process="@form"
+						oncomplete="PF('dcmMM').clearFilters()"
+						actionListener="#{duyetSuatAnTangCa.searchItem()}" />
 				</h:panelGrid>
 			</p:panel>
 			<div style="clear: both" />
-			<p:dataTable var="item" widgetVar="dtlistemployeeTP"
-				value="#{suatAnTangCaBean.employeesThai}" paginator="true" rows="10"
-				rowsPerPageTemplate="10,25,50" paginatorPosition="bottom"
-				scrollable="true" id="dtSuatTangCaTP"
-				filteredValue="#{suatAnTangCaBean.employeesThaiFilters}">
+			<p:dataTable var="item" widgetVar="dcmMM"
+				value="#{duyetSuatAnTangCa.employeesCustom}" paginator="true"
+				rows="10" rowsPerPageTemplate="10,25,50" paginatorPosition="bottom"
+				scrollable="true" id="dtSuatTangCaTP1"
+				filteredValue="#{duyetSuatAnTangCa.employeesCustomFilters}">
 				<f:facet name="header">
-					<p:commandButton action="#{suatAnTangCaBean.saveOrUpdateManager()}"
+					<p:commandButton
+						action="#{duyetSuatAnTangCa.saveOrUpdateManager()}"
 						value="Lưu/cập nhật" style="float:right" icon="ui-icon-update"
-						update="dtSuatTangCaTP,:formDuyetTangCa:growlDuyetTangCa"
+						update=":formDuyetTangCa:growlDuyetTangCa,dtSuatTangCaTP1:checkboxDaDuyet"
 						styleClass="btsearch" />
-					<p:selectBooleanCheckbox value="#{suatAnTangCaBean.daDuyet}"
+					<p:selectBooleanCheckbox value="#{duyetSuatAnTangCa.daDuyet}"
 						itemLabel="Duyệt ĐK"
 						style="float:right;margin-right:20px;font-size:15px;margin-top:5px"
-						styleClass="none" />
+						styleClass="none">
+					</p:selectBooleanCheckbox>
 
 					<div style="clear: both;" />
 				</f:facet>
 				<p:column headerText="Đã duyệt" style="width:25px;text-align:center">
 					<p:selectBooleanCheckbox value="#{item.select}"
-						id="checkboxDaDuyet" disabled="#{suatAnTangCaBean.daDuyet}" />
+						id="checkboxDaDuyet" disabled="#{duyetSuatAnTangCa.daDuyet}">
+						<p:ajax process="@this" />
+					</p:selectBooleanCheckbox>
 				</p:column>
 				<p:column headerText="Mã nhân viên"
 					style="width:100px;text-align:center">

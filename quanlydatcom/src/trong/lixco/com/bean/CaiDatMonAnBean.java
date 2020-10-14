@@ -66,8 +66,7 @@ public class CaiDatMonAnBean extends AbstractBean<OrderFood> {
 
 	@Override
 	protected void initItem() {
-		Date currentDate00 = new Date();
-		currentDate00 = DateUtil.DATE_WITHOUT_TIME(currentDate00);
+		Date currentDate00 = DateUtil.DATE_WITHOUT_TIME(new Date());
 		// init variable
 		dateSearch = currentDate00;
 		dateDetailFromDate = currentDate00;
@@ -132,8 +131,9 @@ public class CaiDatMonAnBean extends AbstractBean<OrderFood> {
 
 	public void deleteRow(FoodByDay item) {
 		try {
-//			// tim xem co ai dang ky mon an hay chua -> neu chua thi cho xoa
-//			List<OrderAndFoodByDate> ofs = ORDER_FOOD_BY_DAY_SERVICE.find(item.getId());
+			// // tim xem co ai dang ky mon an hay chua -> neu chua thi cho xoa
+			// List<OrderAndFoodByDate> ofs =
+			// ORDER_FOOD_BY_DAY_SERVICE.find(item.getId());
 			// chua ai dang ky
 			boolean check = FOOD_DAYBYDAY_SERVICE.delete(item);
 			if (check) {
@@ -142,9 +142,9 @@ public class CaiDatMonAnBean extends AbstractBean<OrderFood> {
 			} else {
 				Notification.NOTI_ERROR("Xóa không thành công");
 			}
-//			} else {
-//				Notification.NOTI_ERROR("Lỗi! Đã có người đăng ký món ăn");
-//			}
+			// } else {
+			// Notification.NOTI_ERROR("Lỗi! Đã có người đăng ký món ăn");
+			// }
 		} catch (Exception e) {
 		}
 	}
@@ -199,7 +199,7 @@ public class CaiDatMonAnBean extends AbstractBean<OrderFood> {
 				}
 			}
 			foodsByDate = FOOD_DAYBYDAY_SERVICE.findByDate(dateSearch, shifts);
-//			Notification.NOTI_SUCCESS("Thành công");
+			// Notification.NOTI_SUCCESS("Thành công");
 			MessageView.INFO("Thành công");
 		}
 	}

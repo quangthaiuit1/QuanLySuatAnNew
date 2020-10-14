@@ -1,7 +1,6 @@
 package trong.lixco.com.bean;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -12,8 +11,6 @@ import org.jboss.logging.Logger;
 import org.omnifaces.cdi.ViewScoped;
 import org.primefaces.PrimeFaces;
 
-import com.mysql.cj.x.protobuf.MysqlxDatatypes.Array;
-
 import trong.lixco.com.account.servicepublics.Department;
 import trong.lixco.com.account.servicepublics.DepartmentServicePublic;
 import trong.lixco.com.account.servicepublics.DepartmentServicePublicProxy;
@@ -21,6 +18,7 @@ import trong.lixco.com.account.servicepublics.Member;
 import trong.lixco.com.account.servicepublics.MemberServicePublic;
 import trong.lixco.com.account.servicepublics.MemberServicePublicProxy;
 import trong.lixco.com.bean.entities.EmployeeThai;
+import trong.lixco.com.bean.staticentity.DateUtil;
 import trong.lixco.com.bean.staticentity.MessageView;
 import trong.lixco.com.bean.staticentity.Notification;
 import trong.lixco.com.ejb.service.FoodOverTimeService;
@@ -29,11 +27,11 @@ import trong.lixco.com.ejb.service.ShiftsService;
 import trong.lixco.com.jpa.entity.FoodOverTime;
 import trong.lixco.com.jpa.entity.OrderFood;
 import trong.lixco.com.jpa.entity.OverTime;
+import trong.lixco.com.jpa.entity.Shifts;
 import trong.lixco.com.servicepublic.EmployeeDTO;
 import trong.lixco.com.servicepublic.EmployeeServicePublic;
 import trong.lixco.com.servicepublic.EmployeeServicePublicProxy;
 import trong.lixco.com.util.DepartmentUtil;
-import trong.lixco.com.jpa.entity.Shifts;
 
 @Named
 @ViewScoped
@@ -66,7 +64,8 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 
 	@Override
 	protected void initItem() {
-		dateSearch = new Date();
+		// dateSearch = new Date();
+		dateSearch = DateUtil.DATE_WITHOUT_TIME(new Date());
 		employeesThai = new ArrayList<>();
 		try {
 			departmentServicePublic = new DepartmentServicePublicProxy();
@@ -74,6 +73,7 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 			EMPLOYEE_SERVICE_PUBLIC = new EmployeeServicePublicProxy();
 			departmentSearchs = new ArrayList<Department>();
 			member = getAccount().getMember();
+			// handle cho chi oanh tim duoc tat ca cac phong ban
 			if (getAccount().isAdmin() || getAccount().getMember().getCode().equals("0001803")) {
 				Department[] deps = departmentServicePublic.findAll();
 				for (int i = 0; i < deps.length; i++) {
@@ -105,10 +105,8 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 		try {
 			daDuyet = false;
 			employeesThai = new ArrayList<>();
-			// convert datesearch to sql date
-			java.sql.Date dateSearchSQL = new java.sql.Date(dateSearch.getTime());
 			// handle nhan vien da chon
-			List<FoodOverTime> foodOT = FOOD_OVER_TIME_SERVICE.find(dateSearchSQL, shiftsSelected.getId(),
+			List<FoodOverTime> foodOT = FOOD_OVER_TIME_SERVICE.find(dateSearch, shiftsSelected.getId(),
 					departmentSearch.getCode());
 			// check duyet hay chua
 			if (foodOT.size() != 0) {
@@ -202,77 +200,12 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 				return;
 			}
 		}
-//		if (daDuyet) {
-//			daDuyetSuatAnView = true;
-//		} else {
-//			daDuyetSuatAnView = false;
-//		}
-//		Notification.NOTI_SUCCESS("Thành công");
-		MessageView.INFO("Thành công");
-	}
-
-	public void saveOrUpdateManager() {
-		// handle xoa toan bo list cu -> add lai list moi
-
-		List<OverTime> foodOT = OVER_TIME_SERVICE.find(dateSearch, shiftsSelected.getId(), departmentSearch.getCode());
-		if (foodOT.size() != 0) {
-			// neu da duyet roi thi khong duoc update
-			if (foodOT.get(0).isIs_duyet() && daDuyet) {
-				Notification.NOTI_ERROR("Trưởng đơn vị đã duyệt không thể chỉnh sửa");
-				return;
-			}
-			boolean deleteNotError = OVER_TIME_SERVICE.delete(foodOT.get(0));
-			if (!deleteNotError) {
-				Notification.NOTI_ERROR("Lỗi");
-				return;
-			}
-		}
-		// chua duyet
-		OverTime entityNew = null;
-		List<EmployeeThai> listEmployeeSelected = new ArrayList<>();
-
-		for (EmployeeThai e : employeesThai) {
-			if (e.isSelect()) {
-				listEmployeeSelected.add(e);
-			}
-		}
-		if (listEmployeeSelected.size() != 0) {
-			OverTime overTimeTemp = new OverTime();
-			overTimeTemp.setCreatedDate(new Date());
-			overTimeTemp.setCreatedUser(member.getCode());
-			overTimeTemp.setDepartment_code(listEmployeeSelected.get(0).getDepartmentCode());
-			overTimeTemp.setDepartment_name(listEmployeeSelected.get(0).getDepartmentName());
-			overTimeTemp.setFood_date(dateSearch);
-			overTimeTemp.setShifts(shiftsSelected);
-			if (daDuyet) {
-				overTimeTemp.setIs_duyet(true);
-			}
-			entityNew = OVER_TIME_SERVICE.create(overTimeTemp);
-			if (entityNew != null) {
-				for (EmployeeThai e : listEmployeeSelected) {
-					FoodOverTime foodOTTemp = new FoodOverTime();
-					foodOTTemp.setEmployee_code(e.getEmployeeCode());
-					foodOTTemp.setEmployee_name(e.getEmployeeName());
-					foodOTTemp.setOver_time(entityNew);
-					FoodOverTime checkCreate = FOOD_OVER_TIME_SERVICE.create(foodOTTemp);
-					if (checkCreate == null) {
-						Notification.NOTI_ERROR("Lỗi");
-						return;
-					}
-				}
-			}
-			// khong them duoc
-			else {
-				Notification.NOTI_ERROR("Lỗi");
-				return;
-			}
-		}
-//		if (daDuyet) {
-//			daDuyetSuatAnView = true;
-//		} else {
-//			daDuyetSuatAnView = false;
-//		}
-//		Notification.NOTI_SUCCESS("Thành công");
+		// if (daDuyet) {
+		// daDuyetSuatAnView = true;
+		// } else {
+		// daDuyetSuatAnView = false;
+		// }
+		// Notification.NOTI_SUCCESS("Thành công");
 		MessageView.INFO("Thành công");
 	}
 

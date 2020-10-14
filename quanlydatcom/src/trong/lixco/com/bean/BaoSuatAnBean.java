@@ -10,6 +10,7 @@ import org.jboss.logging.Logger;
 import org.omnifaces.cdi.ViewScoped;
 
 import trong.lixco.com.account.servicepublics.Member;
+import trong.lixco.com.bean.staticentity.DateUtil;
 import trong.lixco.com.bean.staticentity.MessageView;
 import trong.lixco.com.bean.staticentity.Notification;
 import trong.lixco.com.bean.staticentity.ShiftsUtil;
@@ -41,9 +42,8 @@ public class BaoSuatAnBean extends AbstractBean<OrderFood> {
 	protected void initItem() {
 		member = getAccount().getMember();
 		reportFood = new ReportFoodByDay();
-		dateSearch = new Date();
-		java.sql.Date dateSearchSQL = new java.sql.Date(dateSearch.getTime());
-		reportFoodsByDay = REPORT_FOOD_BY_DAY_SERVICE.findByDate(dateSearchSQL, 0L);
+		dateSearch = DateUtil.DATE_WITHOUT_TIME(new Date());
+		reportFoodsByDay = REPORT_FOOD_BY_DAY_SERVICE.findByDate(dateSearch, 0L);
 		if (!reportFoodsByDay.isEmpty()) {
 			for (ReportFoodByDay r : reportFoodsByDay) {
 				if (r.getShifts().getId() == ShiftsUtil.SHIFTS1_ID) {
@@ -108,7 +108,7 @@ public class BaoSuatAnBean extends AbstractBean<OrderFood> {
 			ReportFoodByDay checkAddNew = REPORT_FOOD_BY_DAY_SERVICE.create(newEntity);
 			if (checkAddNew == null) {
 				Notification.NOTI_ERROR("Lỗi");
-//				MessageView.ERROR("Lỗi");
+				// MessageView.ERROR("Lỗi");
 				return;
 			}
 			// them entity 2
@@ -122,7 +122,7 @@ public class BaoSuatAnBean extends AbstractBean<OrderFood> {
 			ReportFoodByDay checkAddNew1 = REPORT_FOOD_BY_DAY_SERVICE.create(newEntity1);
 			if (checkAddNew1 == null) {
 				Notification.NOTI_ERROR("Lỗi");
-//				MessageView.ERROR("Lỗi");
+				// MessageView.ERROR("Lỗi");
 				return;
 			}
 
@@ -137,10 +137,10 @@ public class BaoSuatAnBean extends AbstractBean<OrderFood> {
 			ReportFoodByDay checkAddNew2 = REPORT_FOOD_BY_DAY_SERVICE.create(newEntity2);
 			if (checkAddNew2 == null) {
 				Notification.NOTI_ERROR("Lỗi");
-//				MessageView.ERROR("Lỗi");
+				// MessageView.ERROR("Lỗi");
 				return;
 			}
-//			Notification.NOTI_SUCCESS("Thành công");
+			// Notification.NOTI_SUCCESS("Thành công");
 			MessageView.INFO("Thành công");
 		}
 	}

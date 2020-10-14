@@ -219,12 +219,14 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 		} catch (Exception e) {
 		}
 		if (isCurrent) {
-//			Notification.NOTI_WARN("Vui lòng đăng ký trước 15h ngày hôm trước");
+			// Notification.NOTI_WARN("Vui lòng đăng ký trước 15h ngày hôm
+			// trước");
 			MessageView.ERROR("Không được xóa sau 14:30 ngày hôm trước");
 			return;
 		}
 
-		// kiem tra xem item duoc xoa -> ngay co nho hon hoac bang ngay hien tai khong
+		// kiem tra xem item duoc xoa -> ngay co nho hon hoac bang ngay hien tai
+		// khong
 		boolean checkDeleted = ORDER_AND_FOOD_BY_DATE_SERVICE.delete(itemSelected);
 		if (checkDeleted) {
 			java.sql.Date abc = new java.sql.Date(itemSelected.getOrder_food().getRegistration_date().getTime());
@@ -306,12 +308,20 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 	}
 
 	public void findData() {
-		// list order food tu DB
-		java.sql.Date start = new java.sql.Date(startDate.getTime());
-		java.sql.Date end = new java.sql.Date(endDate.getTime());
+		try {
+			if (startDate == null || endDate == null) {
+				Notification.NOTI_ERROR("Vui lòng chọn ngày");
+				return;
+			}
+			// list order food tu DB
+			java.sql.Date start = new java.sql.Date(startDate.getTime());
+			java.sql.Date end = new java.sql.Date(endDate.getTime());
 
-		orderFoods = ORDER_FOOD_SERVICE.findByDayToDay(start, end, member.getCode());
-		resetData(this.orderFoods);
+			orderFoods = ORDER_FOOD_SERVICE.findByDayToDay(start, end, member.getCode());
+			resetData(this.orderFoods);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Load lai data
@@ -387,7 +397,7 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 	public void createOrUpdateFoodShifts() {
 		// ca duoc chon khong co mon nao
 		if (food1Selected == null) {
-//			Notification.NOTI_WARN("Vui lòng chọn món");
+			// Notification.NOTI_WARN("Vui lòng chọn món");
 			MessageView.WARN("Vui lòng chọn món");
 			return;
 		}
@@ -401,14 +411,15 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 			} catch (Exception e) {
 			}
 			if (isCurrent) {
-//				Notification.NOTI_WARN("Vui lòng đăng ký trước 15h ngày hôm trước");
+				// Notification.NOTI_WARN("Vui lòng đăng ký trước 15h ngày hôm
+				// trước");
 				MessageView.WARN("Vui lòng đăng ký trước 14:30 ngày hôm trước");
 				return;
 			}
 			if (!isCurrent) {
 				boolean isExpired = isExpired(food1Selected);
 				if (isExpired) {
-//					Notification.NOTI_WARN("Hết hạn đăng ký món ăn");
+					// Notification.NOTI_WARN("Hết hạn đăng ký món ăn");
 					MessageView.ERROR("Hết hạn đăng ký món ăn");
 					return;
 				}
@@ -446,7 +457,7 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 											orderfoodSelected.getRegistration_date().getTime());
 									// cap nhat lai list moi -> phan tu vua them
 									ofsByDate = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(abc, member.getCode());
-//									Notification.NOTI_SUCCESS("Thành công");
+									// Notification.NOTI_SUCCESS("Thành công");
 									MessageView.INFO("Thành công");
 									return;
 								} else {
@@ -454,7 +465,8 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 											orderfoodSelected.getRegistration_date().getTime());
 									// cap nhat lai list moi -> phan tu vua them
 									ofsByDate = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(abc, member.getCode());
-//									Notification.NOTI_ERROR("Không thành công");
+									// Notification.NOTI_ERROR("Không thành
+									// công");
 									MessageView.ERROR("Không thành công");
 									return;
 								}
@@ -469,11 +481,12 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 									java.sql.Date abc = new java.sql.Date(
 											orderfoodSelected.getRegistration_date().getTime());
 									ofsByDate = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(abc, member.getCode());
-//									Notification.NOTI_SUCCESS("Thành công");
+									// Notification.NOTI_SUCCESS("Thành công");
 									MessageView.INFO("Thành công");
 									return;
 								} else {
-//									Notification.NOTI_ERROR("Không thành công");
+									// Notification.NOTI_ERROR("Không thành
+									// công");
 									MessageView.ERROR("Không thành công");
 									return;
 								}
@@ -494,7 +507,7 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 										orderfoodSelected.getRegistration_date().getTime());
 								// cap nhat lai list moi -> phan tu vua them
 								ofsByDate = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(abc, member.getCode());
-//								Notification.NOTI_SUCCESS("Thành công");
+								// Notification.NOTI_SUCCESS("Thành công");
 								MessageView.INFO("Thành công");
 							}
 						}

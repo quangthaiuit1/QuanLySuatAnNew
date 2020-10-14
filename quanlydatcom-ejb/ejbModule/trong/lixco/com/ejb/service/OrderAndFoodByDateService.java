@@ -302,4 +302,33 @@ public class OrderAndFoodByDateService extends AbstractService<OrderAndFoodByDat
 			return new ArrayList<OrderAndFoodByDate>();
 		}
 	}
+
+	public List<OrderAndFoodByDate> findByDate(java.util.Date date, long shiftsId) {
+		// primary
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<OrderAndFoodByDate> cq = cb.createQuery(OrderAndFoodByDate.class);
+		Root<OrderAndFoodByDate> root = cq.from(OrderAndFoodByDate.class);
+		List<Predicate> queries = new ArrayList<>();
+		if (date != null) {
+			Predicate resultQueryFirst = cb.equal(root.get("order_food").get("registration_date"), date);
+			queries.add(resultQueryFirst);
+		}
+		if (shiftsId != 0) {
+			Predicate resultQuerySecond = cb.equal(root.get("food_by_day").get("shifts").get("id"), shiftsId);
+			queries.add(resultQuerySecond);
+		}
+		Predicate data[] = new Predicate[queries.size()];
+		for (int i = 0; i < queries.size(); i++) {
+			data[i] = queries.get(i);
+		}
+		Predicate finalPredicate = cb.and(data);
+		cq.select(root).where(finalPredicate).orderBy(cb.asc(root.get("food_by_day").get("shifts").get("id")));
+		TypedQuery<OrderAndFoodByDate> query = em.createQuery(cq);
+		List<OrderAndFoodByDate> results = query.getResultList();
+		if (!results.isEmpty()) {
+			return results;
+		} else {
+			return new ArrayList<OrderAndFoodByDate>();
+		}
+	}
 }

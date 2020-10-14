@@ -109,4 +109,33 @@ public class FoodOverTimeService extends AbstractService<FoodOverTime> {
 			return new ArrayList<FoodOverTime>();
 		}
 	}
+
+	public List<FoodOverTime> find(long overtimeId, String employeeCode) {
+		// primary
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<FoodOverTime> cq = cb.createQuery(FoodOverTime.class);
+		Root<FoodOverTime> root = cq.from(FoodOverTime.class);
+		List<Predicate> queries = new ArrayList<>();
+		if (overtimeId != 0) {
+			Predicate shiftsQuery = cb.equal(root.get("over_time").get("id"), overtimeId);
+			queries.add(shiftsQuery);
+		}
+		if (employeeCode != null) {
+			Predicate shiftsQuery = cb.equal(root.get("employee_code"), employeeCode);
+			queries.add(shiftsQuery);
+		}
+		Predicate data[] = new Predicate[queries.size()];
+		for (int i = 0; i < queries.size(); i++) {
+			data[i] = queries.get(i);
+		}
+		Predicate finalPredicate = cb.and(data);
+		cq.where(finalPredicate);
+		TypedQuery<FoodOverTime> query = em.createQuery(cq);
+		List<FoodOverTime> results = query.getResultList();
+		if (!results.isEmpty()) {
+			return results;
+		} else {
+			return new ArrayList<FoodOverTime>();
+		}
+	}
 }

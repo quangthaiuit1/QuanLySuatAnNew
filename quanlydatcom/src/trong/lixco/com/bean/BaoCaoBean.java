@@ -1466,7 +1466,8 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 			// list nhan vien di lam
 			List<OrderAndFoodByDate> ofs = new ArrayList<>();
 			if (!listDataVerify.isEmpty()) {
-				List<OrderAndFoodByDate> ofsTemp = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(fromDateAte, null);
+				List<OrderAndFoodByDate> ofsTemp = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(fromDateAte,
+						shiftsSelected.getId());
 				// kiem tra nv hom do co di lam khong
 				for (int i = 0; i < ofsTemp.size(); i++) {
 					boolean isWork = false;
