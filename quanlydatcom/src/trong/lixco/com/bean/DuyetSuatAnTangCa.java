@@ -141,170 +141,174 @@ public class DuyetSuatAnTangCa extends AbstractBean<OrderFood> {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
-
-	public void saveOrUpdateManager() {
-		// handle xoa toan bo list cu -> add lai list moi
-
-		List<OverTime> foodOT = OVER_TIME_SERVICE.find(dateSearch, shiftsSelected.getId(), departmentSearch.getCode());
-		if (foodOT.size() != 0) {
-			// neu da duyet roi thi khong duoc update
-			if (foodOT.get(0).isIs_duyet() && daDuyet) {
-				Notification.NOTI_ERROR("Trưởng đơn vị đã duyệt không thể chỉnh sửa");
-				return;
-			}
-			// neu da duyet roi thi khong duoc update
-			if (foodOT.get(0).isIs_duyet() && !daDuyet) {
-				foodOT.get(0).setIs_duyet(false);
-				OVER_TIME_SERVICE.update(foodOT.get(0));
-				searchItem();
-				MessageView.INFO("Thành công");
-				PrimeFaces.current().ajax().update("formDuyetTangCa:dtSuatTangCaTP1");
-				return;
-			}
-			// kiem tra nut duyet co duoc check chua
-			if (daDuyet) {
-				// tim danh sach nhan vien tang ca tren view
-				boolean haveEmpOT = false;
-				for (EmployeeThai e : employeesCustom) {
-					if (e.isSelect()) {
-						haveEmpOT = true;
-						break;
-					}
-				}
-				if (!haveEmpOT) {
-					Notification.NOTI_ERROR("Vui lòng chọn nhân viên trước khi duyệt");
-					return;
-				}
-				// co nhan vien tang ca
-				if (haveEmpOT) {
-					foodOT.get(0).setIs_duyet(true);
-					OverTime o = OVER_TIME_SERVICE.update(foodOT.get(0));
-					if (o != null) {
-						List<FoodOverTime> foodOTByOTId = FOOD_OVER_TIME_SERVICE.find(o.getId(), null);
-						// bang chi tiet tang ca co nhan vien
-						if (foodOTByOTId.size() != 0) {
-							for (int i = 0; i < employeesCustom.size(); i++) {
-								// boolean isItemNew = false;
-								boolean isHaveNV = false;
-								int indexNVExisted = 0;
-								for (int j = 0; j < foodOTByOTId.size(); j++) {
-									// khong duoc check tren view nhung trong db
-									// co
-									if (foodOTByOTId.get(j).getEmployee_code()
-											.equals(employeesCustom.get(i).getEmployeeCode())) {
-										isHaveNV = true;
-										indexNVExisted = j;
-									}
-								}
-								if (isHaveNV) {
-									if (!employeesCustom.get(i).isSelect()) {
-										// xoa item do duoi db
-										try {
-											FOOD_OVER_TIME_SERVICE.delete(foodOTByOTId.get(indexNVExisted));
-										} catch (Exception e) {
-											e.printStackTrace();
-										}
-									}
-								}
-								if (!isHaveNV) {
-									if (employeesCustom.get(i).isSelect()) {
-										FoodOverTime foodOTTemp = new FoodOverTime();
-										foodOTTemp.setEmployee_code(employeesCustom.get(i).getEmployeeCode());
-										foodOTTemp.setEmployee_name(employeesCustom.get(i).getEmployeeName());
-										foodOTTemp.setOver_time(o);
-										try {
-											FOOD_OVER_TIME_SERVICE.create(foodOTTemp);
-										} catch (Exception e) {
-											e.printStackTrace();
-										}
-									}
-								}
-							}
-							PrimeFaces.current().ajax().update("formDuyetTangCa:dtSuatTangCaTP1");
-							MessageView.INFO("Thành công");
-							return;
-						}
-						// bang chi tiet tang ca khong co nhan vien -> them moi
-						if (foodOTByOTId.size() == 0) {
-							List<EmployeeThai> listEmployeeSelected = new ArrayList<>();
-							for (int i = 0; i < employeesCustom.size(); i++) {
-								if (employeesCustom.get(i).isSelect()) {
-									listEmployeeSelected.add(employeesCustom.get(i));
-								}
-							}
-							if (listEmployeeSelected.size() != 0) {
-								for (int i = 0; i < listEmployeeSelected.size(); i++) {
-									FoodOverTime foodOTTemp = new FoodOverTime();
-									foodOTTemp.setEmployee_code(listEmployeeSelected.get(i).getEmployeeCode());
-									foodOTTemp.setEmployee_name(listEmployeeSelected.get(i).getEmployeeName());
-									foodOTTemp.setOver_time(o);
-									try {
-										FOOD_OVER_TIME_SERVICE.create(foodOTTemp);
-									} catch (Exception e2) {
-										e2.printStackTrace();
-									}
-								}
-							}
-							PrimeFaces.current().ajax().update("formDuyetTangCa:dtSuatTangCaTP1");
-							MessageView.INFO("Thành công");
-							return;
-						}
-					}
-				}
-			}
-			// boolean deleteNotError = OVER_TIME_SERVICE.delete(foodOT.get(0));
-			// if (!deleteNotError) {
-			// Notification.NOTI_ERROR("Lỗi");
-			// return;
-			// }
-		}
-		// chua co thong tin tang ca tu phong hanh chinh
-		if (foodOT.size() == 0) {
-			// chua duyet
-			OverTime entityNew = null;
-			List<EmployeeThai> listEmployeeSelected = new ArrayList<>();
-
-			for (EmployeeThai e : employeesCustom) {
-				if (e.isSelect()) {
-					listEmployeeSelected.add(e);
-				}
-			}
-			if (listEmployeeSelected.size() != 0) {
-				OverTime overTimeTemp = new OverTime();
-				overTimeTemp.setCreatedDate(new Date());
-				overTimeTemp.setCreatedUser(member.getCode());
-				overTimeTemp.setDepartment_code(listEmployeeSelected.get(0).getDepartmentCode());
-				overTimeTemp.setDepartment_name(listEmployeeSelected.get(0).getDepartmentName());
-				overTimeTemp.setFood_date(dateSearch);
-				overTimeTemp.setShifts(shiftsSelected);
-				if (daDuyet) {
-					overTimeTemp.setIs_duyet(true);
-				}
-				entityNew = OVER_TIME_SERVICE.create(overTimeTemp);
-				if (entityNew != null) {
-					for (EmployeeThai e : listEmployeeSelected) {
-						FoodOverTime foodOTTemp = new FoodOverTime();
-						foodOTTemp.setEmployee_code(e.getEmployeeCode());
-						foodOTTemp.setEmployee_name(e.getEmployeeName());
-						foodOTTemp.setOver_time(entityNew);
-						FoodOverTime checkCreate = FOOD_OVER_TIME_SERVICE.create(foodOTTemp);
-						if (checkCreate == null) {
-							Notification.NOTI_ERROR("Lỗi");
-							return;
-						}
-					}
-				}
-				// khong them duoc
-				else {
-					Notification.NOTI_ERROR("Lỗi");
-					return;
-				}
-			}
-			MessageView.INFO("Thành công");
-		}
+	
+	public void saveOrUpdate(){
+		
 	}
+	
+
+//	public void saveOrUpdateManager() {
+//		// handle xoa toan bo list cu -> add lai list moi
+//
+//		List<OverTime> foodOT = OVER_TIME_SERVICE.find(dateSearch, shiftsSelected.getId(), departmentSearch.getCode());
+//		if (foodOT.size() != 0) {
+//			// neu da duyet roi thi khong duoc update
+//			if (foodOT.get(0).isIs_duyet() && daDuyet) {
+//				Notification.NOTI_ERROR("Trưởng đơn vị đã duyệt không thể chỉnh sửa");
+//				return;
+//			}
+//			// neu da duyet roi thi khong duoc update
+//			if (foodOT.get(0).isIs_duyet() && !daDuyet) {
+//				foodOT.get(0).setIs_duyet(false);
+//				OVER_TIME_SERVICE.update(foodOT.get(0));
+//				searchItem();
+//				MessageView.INFO("Thành công");
+//				PrimeFaces.current().ajax().update("formDuyetTangCa:dtSuatTangCaTP1");
+//				return;
+//			}
+//			// kiem tra nut duyet co duoc check chua
+//			if (daDuyet) {
+//				// tim danh sach nhan vien tang ca tren view
+//				boolean haveEmpOT = false;
+//				for (EmployeeThai e : employeesCustom) {
+//					if (e.isSelect()) {
+//						haveEmpOT = true;
+//						break;
+//					}
+//				}
+//				if (!haveEmpOT) {
+//					Notification.NOTI_ERROR("Vui lòng chọn nhân viên trước khi duyệt");
+//					return;
+//				}
+//				// co nhan vien tang ca
+//				if (haveEmpOT) {
+//					foodOT.get(0).setIs_duyet(true);
+//					OverTime o = OVER_TIME_SERVICE.update(foodOT.get(0));
+//					if (o != null) {
+//						List<FoodOverTime> foodOTByOTId = FOOD_OVER_TIME_SERVICE.find(o.getId(), null);
+//						// bang chi tiet tang ca co nhan vien
+//						if (foodOTByOTId.size() != 0) {
+//							for (int i = 0; i < employeesCustom.size(); i++) {
+//								// boolean isItemNew = false;
+//								boolean isHaveNV = false;
+//								int indexNVExisted = 0;
+//								for (int j = 0; j < foodOTByOTId.size(); j++) {
+//									// khong duoc check tren view nhung trong db
+//									// co
+//									if (foodOTByOTId.get(j).getEmployee_code()
+//											.equals(employeesCustom.get(i).getEmployeeCode())) {
+//										isHaveNV = true;
+//										indexNVExisted = j;
+//									}
+//								}
+//								if (isHaveNV) {
+//									if (!employeesCustom.get(i).isSelect()) {
+//										// xoa item do duoi db
+//										try {
+//											FOOD_OVER_TIME_SERVICE.delete(foodOTByOTId.get(indexNVExisted));
+//										} catch (Exception e) {
+//											e.printStackTrace();
+//										}
+//									}
+//								}
+//								if (!isHaveNV) {
+//									if (employeesCustom.get(i).isSelect()) {
+//										FoodOverTime foodOTTemp = new FoodOverTime();
+//										foodOTTemp.setEmployee_code(employeesCustom.get(i).getEmployeeCode());
+//										foodOTTemp.setEmployee_name(employeesCustom.get(i).getEmployeeName());
+//										foodOTTemp.setOver_time(o);
+//										try {
+//											FOOD_OVER_TIME_SERVICE.create(foodOTTemp);
+//										} catch (Exception e) {
+//											e.printStackTrace();
+//										}
+//									}
+//								}
+//							}
+//							PrimeFaces.current().ajax().update("formDuyetTangCa:dtSuatTangCaTP1");
+//							MessageView.INFO("Thành công");
+//							return;
+//						}
+//						// bang chi tiet tang ca khong co nhan vien -> them moi
+//						if (foodOTByOTId.size() == 0) {
+//							List<EmployeeThai> listEmployeeSelected = new ArrayList<>();
+//							for (int i = 0; i < employeesCustom.size(); i++) {
+//								if (employeesCustom.get(i).isSelect()) {
+//									listEmployeeSelected.add(employeesCustom.get(i));
+//								}
+//							}
+//							if (listEmployeeSelected.size() != 0) {
+//								for (int i = 0; i < listEmployeeSelected.size(); i++) {
+//									FoodOverTime foodOTTemp = new FoodOverTime();
+//									foodOTTemp.setEmployee_code(listEmployeeSelected.get(i).getEmployeeCode());
+//									foodOTTemp.setEmployee_name(listEmployeeSelected.get(i).getEmployeeName());
+//									foodOTTemp.setOver_time(o);
+//									try {
+//										FOOD_OVER_TIME_SERVICE.create(foodOTTemp);
+//									} catch (Exception e2) {
+//										e2.printStackTrace();
+//									}
+//								}
+//							}
+//							PrimeFaces.current().ajax().update("formDuyetTangCa:dtSuatTangCaTP1");
+//							MessageView.INFO("Thành công");
+//							return;
+//						}
+//					}
+//				}
+//			}
+//			// boolean deleteNotError = OVER_TIME_SERVICE.delete(foodOT.get(0));
+//			// if (!deleteNotError) {
+//			// Notification.NOTI_ERROR("Lỗi");
+//			// return;
+//			// }
+//		}
+//		// chua co thong tin tang ca tu phong hanh chinh
+//		if (foodOT.size() == 0) {
+//			// chua duyet
+//			OverTime entityNew = null;
+//			List<EmployeeThai> listEmployeeSelected = new ArrayList<>();
+//
+//			for (EmployeeThai e : employeesCustom) {
+//				if (e.isSelect()) {
+//					listEmployeeSelected.add(e);
+//				}
+//			}
+//			if (listEmployeeSelected.size() != 0) {
+//				OverTime overTimeTemp = new OverTime();
+//				overTimeTemp.setCreatedDate(new Date());
+//				overTimeTemp.setCreatedUser(member.getCode());
+//				overTimeTemp.setDepartment_code(listEmployeeSelected.get(0).getDepartmentCode());
+//				overTimeTemp.setDepartment_name(listEmployeeSelected.get(0).getDepartmentName());
+//				overTimeTemp.setFood_date(dateSearch);
+//				overTimeTemp.setShifts(shiftsSelected);
+//				if (daDuyet) {
+//					overTimeTemp.setIs_duyet(true);
+//				}
+//				entityNew = OVER_TIME_SERVICE.create(overTimeTemp);
+//				if (entityNew != null) {
+//					for (EmployeeThai e : listEmployeeSelected) {
+//						FoodOverTime foodOTTemp = new FoodOverTime();
+//						foodOTTemp.setEmployee_code(e.getEmployeeCode());
+//						foodOTTemp.setEmployee_name(e.getEmployeeName());
+//						foodOTTemp.setOver_time(entityNew);
+//						FoodOverTime checkCreate = FOOD_OVER_TIME_SERVICE.create(foodOTTemp);
+//						if (checkCreate == null) {
+//							Notification.NOTI_ERROR("Lỗi");
+//							return;
+//						}
+//					}
+//				}
+//				// khong them duoc
+//				else {
+//					Notification.NOTI_ERROR("Lỗi");
+//					return;
+//				}
+//			}
+//			MessageView.INFO("Thành công");
+//		}
+//	}
 
 	@Override
 	protected Logger getLogger() {

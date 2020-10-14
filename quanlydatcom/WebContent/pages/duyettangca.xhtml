@@ -103,8 +103,7 @@
 				scrollable="true" id="dtSuatTangCaTP1"
 				filteredValue="#{duyetSuatAnTangCa.employeesCustomFilters}">
 				<f:facet name="header">
-					<p:commandButton
-						action="#{duyetSuatAnTangCa.saveOrUpdateManager()}"
+					<p:commandButton action="#{duyetSuatAnTangCa.saveOrUpdate()}"
 						value="Lưu/cập nhật" style="float:right" icon="ui-icon-update"
 						update=":formDuyetTangCa:growlDuyetTangCa,dtSuatTangCaTP1:checkboxDaDuyet"
 						styleClass="btsearch" />
