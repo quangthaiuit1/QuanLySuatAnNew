@@ -42,7 +42,7 @@ public abstract class AbstractService<T> implements ImplAbstract<T> {
 		} catch (Exception e) {
 			e.printStackTrace();
 			result = false;
-//			getLogger().error(e.getLocalizedMessage());
+			// getLogger().error(e.getLocalizedMessage());
 			getUt().setRollbackOnly();
 		}
 		return result;

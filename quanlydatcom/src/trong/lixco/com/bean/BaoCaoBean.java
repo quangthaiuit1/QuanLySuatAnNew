@@ -216,73 +216,88 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 				totalTangCa = foodOT.size();
 			}
 		}
-
-		// convert array to list
-		List<TimekeepingData> listDataVerify = new ArrayList<>();
-		try {
-			DateFormat formatter1 = new SimpleDateFormat("dd/MM/yyyy");
-			String dateSearchString = formatter1.format(dateSearchExactly);
-			TimekeepingData[] arr = null;
-			boolean checkShifts0 = false;
-			if (shiftsExactly == 0) {
-				// 8C la ca sang 6h->6h toi -> bao gom nhan vien van phong
-				// va cong nhan
-				arr = TimekeepingDataService.timtheongay(dateSearchString);
-				this.shiftsExactly = 1;
-				checkShifts0 = true;
-			}
-			if (shiftsExactly == ShiftsUtil.SHIFTS1_ID && !checkShifts0) {
-				// 8C la ca sang 6h->6h toi // gom nv van phong va cong nhan
-				arr = TimekeepingDataService.timtheongay(dateSearchString);
-			}
-			if (shiftsExactly == ShiftsUtil.SHIFTS2_ID) {
-				// nhan vien di ca
-				arr = TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString, "8C");
-				List<TimekeepingData> arrListTemp = new ArrayList<>();
-				if (arr != null) {
-					for (int i = 0; i < arr.length; i++) {
-						// check dieu kien co di ca hay khong
-						if (arr[i].isWorkShift()) {
-							arrListTemp.add(arr[i]);
-						}
-					}
-					arr = arrListTemp.toArray(new TimekeepingData[arrListTemp.size()]);
-				}
-			}
-			if (shiftsExactly == ShiftsUtil.SHIFTS3_ID) {
-				// cd la ca chieu 6h toi-> 6h sang
-				arr = TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString, "CD");
-			}
-			if (arr != null) {
-				listDataVerify = Arrays.asList(arr);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		boolean checkExist = false;
+		// da luu thong tin ca xuong duoi
 		if (quantityFoods.size() != 0) {
 			quantitySelected = quantityFoods.get(0);
-			// kiem tra xem thu so lieu da luu va so lieu moi lay co dung hay
-			// khong
-			int toanbonvquetvantay = listDataVerify.size();
-			if (toanbonvquetvantay != 0) {
-				// neu so lieu bang nhau thi chap nhan
-				if (toanbonvquetvantay == quantitySelected.getTongsuatan()) {
-					checkExist = true;
-					return;
-				}
-			}
 		}
-		if (!checkExist) {
+		// convert array to list
+		List<TimekeepingData> listDataVerify = new ArrayList<>();
+		if (quantityFoods.size() == 0) {
 			try {
+				DateFormat formatter1 = new SimpleDateFormat("dd/MM/yyyy");
+				String dateSearchString = formatter1.format(dateSearchExactly);
+				TimekeepingData[] arr = null;
+				boolean checkShifts0 = false;
+				if (shiftsExactly == 0) {
+					// 8C la ca sang 6h->6h toi -> bao gom nhan vien van phong
+					// va cong nhan
+					arr = TimekeepingDataService.timtheongay(dateSearchString);
+					this.shiftsExactly = 1;
+					checkShifts0 = true;
+				}
+				if (shiftsExactly == ShiftsUtil.SHIFTS1_ID && !checkShifts0) {
+					// 8C la ca sang 6h->6h toi // gom nv van phong va cong nhan
+					arr = TimekeepingDataService.timtheongay(dateSearchString);
+					// System.out.println("arr: " + arr.length);
+					//
+					// TimekeepingData[] arrCD =
+					// TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString,
+					// "CD");
+					// if (arrCD != null) {
+					// System.out.println("arrCD: " + arrCD.length);
+					// }
+					//
+					// TimekeepingData[] arr8C =
+					// TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString,
+					// "8C");
+					// if (arr8C != null) {
+					// System.out.println("arr8C: " + arr8C.length);
+					// }
+					//
+					// // loc ra nhan vien di ca CD
+					// List<TimekeepingData> arrAfterFilter = new ArrayList<>();
+					// for (int i = 0; i < arr.length; i++) {
+					// if (arr[i].getWorkTemp() == null) {
+					// System.out.println("index: " + i);
+					// System.out.println(arr[i].getCode());
+					// }
+					// if ((arr[i].getWorkTemp() != null &&
+					// arr[i].getWorkTemp().equals("8"))
+					// || (arr[i].getWorkTemp() != null &&
+					// arr[i].getWorkTemp().equals("8C"))) {
+					// arrAfterFilter.add(arr[i]);
+					// }
+					// }
+					// arr = arrAfterFilter.toArray(new
+					// TimekeepingData[arrAfterFilter.size()]);
+				}
+				if (shiftsExactly == ShiftsUtil.SHIFTS2_ID) {
+					// nhan vien di ca
+					arr = TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString, "8C");
+					List<TimekeepingData> arrListTemp = new ArrayList<>();
+					if (arr != null) {
+						for (int i = 0; i < arr.length; i++) {
+							// check dieu kien co di ca hay khong
+							if (arr[i].isWorkShift()) {
+								arrListTemp.add(arr[i]);
+							}
+						}
+						arr = arrListTemp.toArray(new TimekeepingData[arrListTemp.size()]);
+					}
+				}
+				if (shiftsExactly == ShiftsUtil.SHIFTS3_ID) {
+					// cd la ca chieu 6h toi-> 6h sang
+					arr = TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString, "CD");
+				}
+				if (arr != null) {
+					listDataVerify = Arrays.asList(arr);
+				}
 				if (!listDataVerify.isEmpty()) {
 					// set ngay va ca
 					quantitySelected.setFood_date(dateSearchExactly);
 					Shifts sTemp = SHIFTS_SERVICE.findById(shiftsExactly);
 					quantitySelected.setShifts(sTemp);
-					// toan bo van tay theo chuong trinh cham cong
 					quantitySelected.setTongsuatan(listDataVerify.size());
-
 					// list de gan qua report
 					List<OrderAndFoodByDate> ofs = new ArrayList<>();
 					List<OrderAndFoodByDate> ofsTemp = ORDER_AND_FOOD_BY_DATE_SERVICE
@@ -403,64 +418,82 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 				totalTangCa = foodOT.size();
 			}
 		}
-		// convert array to list
-		List<TimekeepingData> listDataVerify = new ArrayList<>();
-		try {
-			DateFormat formatter1 = new SimpleDateFormat("dd/MM/yyyy");
-			String dateSearchString = formatter1.format(dateSearchExactly);
-			TimekeepingData[] arr = null;
-			boolean checkShifts0 = false;
-			if (shiftsExactly == 0) {
-				// 8C la ca sang 6h->6h toi -> bao gom nhan vien van phong
-				// va cong nhan
-				arr = TimekeepingDataService.timtheongay(dateSearchString);
-				this.shiftsExactly = 1;
-				checkShifts0 = true;
-			}
-			if (shiftsExactly == ShiftsUtil.SHIFTS1_ID && !checkShifts0) {
-				// 8C la ca sang 6h->6h toi // gom nv van phong va cong nhan
-				arr = TimekeepingDataService.timtheongay(dateSearchString);
-			}
-			if (shiftsExactly == ShiftsUtil.SHIFTS2_ID) {
-				// nhan vien di ca
-				arr = TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString, "8C");
-				List<TimekeepingData> arrListTemp = new ArrayList<>();
-				if (arr != null) {
-					for (int i = 0; i < arr.length; i++) {
-						// check dieu kien co di ca hay khong
-						if (arr[i].isWorkShift()) {
-							arrListTemp.add(arr[i]);
-						}
-					}
-					arr = arrListTemp.toArray(new TimekeepingData[arrListTemp.size()]);
-				}
-			}
-			if (shiftsExactly == ShiftsUtil.SHIFTS3_ID) {
-				// cd la ca chieu 6h toi-> 6h sang
-				arr = TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString, "CD");
-			}
-			if (arr != null) {
-				listDataVerify = Arrays.asList(arr);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		boolean checkExist = false;
+		// da luu thong tin ca xuong duoi
 		if (quantityFoods.size() != 0) {
 			quantitySelected = quantityFoods.get(0);
-			// kiem tra xem thu so lieu da luu va so lieu moi lay co dung hay
-			// khong
-			int toanbonvquetvantay = listDataVerify.size();
-			if (toanbonvquetvantay != 0) {
-				// neu so lieu bang nhau thi chap nhan
-				if (toanbonvquetvantay == quantityFoods.get(0).getTongsuatan()) {
-					checkExist = true;
-					return;
-				}
-			}
 		}
-		if (!checkExist) {
+		// convert array to list
+		List<TimekeepingData> listDataVerify = new ArrayList<>();
+		if (quantityFoods.size() == 0) {
 			try {
+				DateFormat formatter1 = new SimpleDateFormat("dd/MM/yyyy");
+				String dateSearchString = formatter1.format(dateSearchExactly);
+				TimekeepingData[] arr = null;
+				boolean checkShifts0 = false;
+				if (shiftsExactly == 0) {
+					// 8C la ca sang 6h->6h toi -> bao gom nhan vien van phong
+					// va cong nhan
+					arr = TimekeepingDataService.timtheongay(dateSearchString);
+					this.shiftsExactly = 1;
+					checkShifts0 = true;
+				}
+				if (shiftsExactly == ShiftsUtil.SHIFTS1_ID && !checkShifts0) {
+					// 8C la ca sang 6h->6h toi // gom nv van phong va cong nhan
+					arr = TimekeepingDataService.timtheongay(dateSearchString);
+					// System.out.println("arr: " + arr.length);
+					//
+					// TimekeepingData[] arrCD =
+					// TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString,
+					// "CD");
+					// if (arrCD != null) {
+					// System.out.println("arrCD: " + arrCD.length);
+					// }
+					//
+					// TimekeepingData[] arr8C =
+					// TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString,
+					// "8C");
+					// if (arr8C != null) {
+					// System.out.println("arr8C: " + arr8C.length);
+					// }
+					//
+					// // loc ra nhan vien di ca CD
+					// List<TimekeepingData> arrAfterFilter = new ArrayList<>();
+					// for (int i = 0; i < arr.length; i++) {
+					// if (arr[i].getWorkTemp() == null) {
+					// System.out.println("index: " + i);
+					// System.out.println(arr[i].getCode());
+					// }
+					// if ((arr[i].getWorkTemp() != null &&
+					// arr[i].getWorkTemp().equals("8"))
+					// || (arr[i].getWorkTemp() != null &&
+					// arr[i].getWorkTemp().equals("8C"))) {
+					// arrAfterFilter.add(arr[i]);
+					// }
+					// }
+					// arr = arrAfterFilter.toArray(new
+					// TimekeepingData[arrAfterFilter.size()]);
+				}
+				if (shiftsExactly == ShiftsUtil.SHIFTS2_ID) {
+					// nhan vien di ca
+					arr = TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString, "8C");
+					List<TimekeepingData> arrListTemp = new ArrayList<>();
+					if (arr != null) {
+						for (int i = 0; i < arr.length; i++) {
+							// check dieu kien co di ca hay khong
+							if (arr[i].isWorkShift()) {
+								arrListTemp.add(arr[i]);
+							}
+						}
+						arr = arrListTemp.toArray(new TimekeepingData[arrListTemp.size()]);
+					}
+				}
+				if (shiftsExactly == ShiftsUtil.SHIFTS3_ID) {
+					// cd la ca chieu 6h toi-> 6h sang
+					arr = TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString, "CD");
+				}
+				if (arr != null) {
+					listDataVerify = Arrays.asList(arr);
+				}
 				if (!listDataVerify.isEmpty()) {
 					// set ngay va ca
 					quantitySelected.setFood_date(dateSearchExactly);

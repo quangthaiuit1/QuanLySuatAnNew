@@ -5,14 +5,12 @@ import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.ejb.EJB;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -350,6 +348,7 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 					if (ofTemps.get(j).getRegistration_date().getDate() == orderFoodsTemp.get(i).getRegistration_date()
 							.getDate()) {
 						check = true;
+						orderFoods.get(j).setIs_eated(true);
 						break;
 					}
 				}
@@ -457,7 +456,6 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 											orderfoodSelected.getRegistration_date().getTime());
 									// cap nhat lai list moi -> phan tu vua them
 									ofsByDate = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(abc, member.getCode());
-									// Notification.NOTI_SUCCESS("Thành công");
 									MessageView.INFO("Thành công");
 									return;
 								} else {
@@ -507,7 +505,19 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 										orderfoodSelected.getRegistration_date().getTime());
 								// cap nhat lai list moi -> phan tu vua them
 								ofsByDate = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(abc, member.getCode());
-								// Notification.NOTI_SUCCESS("Thành công");
+								// Handle load lai data tren view
+								try {
+									if (startDate != null && endDate != null) {
+										// list order food tu DB
+										java.sql.Date start = new java.sql.Date(startDate.getTime());
+										java.sql.Date end = new java.sql.Date(endDate.getTime());
+
+										orderFoods = ORDER_FOOD_SERVICE.findByDayToDay(start, end, member.getCode());
+										resetData(this.orderFoods);
+									}
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
 								MessageView.INFO("Thành công");
 							}
 						}

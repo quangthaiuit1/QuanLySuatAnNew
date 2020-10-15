@@ -17,6 +17,12 @@
 	max-height: 100%;
 }
 
+.old {
+	background-color: #fca752 !important;
+	background-image: none !important;
+	color: #000000 !important;
+}
+
 .btnDelete {
 	background: red !important;
 	color: white !important;
@@ -441,8 +447,8 @@
 						<center>
 							<p:dataTable value="#{dangKyComBean.orderFoods}"
 								rowKey="#{item.id}" id="dtOrderFood" var="item"
-								scrollable="true" scrollHeight="800" style="max-width: 800px">
-
+								scrollable="true" scrollHeight="800" style="max-width: 800px"
+								rowStyleClass="#{!item.is_eated ? 'old' : null}">
 								<p:column headerText="Ngày" width="15">
 									<center>
 										<h:outputText value="#{item.registration_date}">
@@ -459,6 +465,10 @@
 									</center>
 								</p:column>
 								<f:facet name="footer">
+									<div>
+										<p style="font-weight: bold">Chú thích:</p>
+										<p>Dòng màu cam là ngày chưa đăng ký suất ăn.</p>
+									</div>
 									<div style="clear: both;" />
 								</f:facet>
 							</p:dataTable>

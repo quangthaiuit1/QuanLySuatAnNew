@@ -29,8 +29,8 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 	private static final long serialVersionUID = 1L;
 	private java.util.List<CategoryFood> categoryFoods;
 	private List<CategoryFood> categoryFoodsFilter;
-//	private java.util.List<CategoryFood> categoryFoodsRemove;
-//	private CategoryFood categoryFoodSelected;
+	// private java.util.List<CategoryFood> categoryFoodsRemove;
+	// private CategoryFood categoryFoodSelected;
 	private CategoryFood cFoodNew;
 	private CategoryFood cFoodUpdate;
 
@@ -46,7 +46,7 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 		cFoodUpdate = new CategoryFood();
 		notify = new Notify(FacesContext.getCurrentInstance());
 		categoryFoods = new ArrayList<CategoryFood>();
-//		categoryFoodsRemove = new ArrayList<>();
+		// categoryFoodsRemove = new ArrayList<>();
 		try {
 			categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
 		} catch (Exception e) {
@@ -56,37 +56,38 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 
 	}
 
-//	public void addRowNew() {
-//		CategoryFood categoryTemp = new CategoryFood();
-//		categoryTemp.setCreatedUser(member.getName());
-//		categoryFoods.add(categoryTemp);
-//	}
+	// public void addRowNew() {
+	// CategoryFood categoryTemp = new CategoryFood();
+	// categoryTemp.setCreatedUser(member.getName());
+	// categoryFoods.add(categoryTemp);
+	// }
 
-//	public void saveOrUpdate() {
-//		// remove list deleted
-//		for (CategoryFood c : categoryFoodsRemove) {
-//			CATEGORY_FOOD_SERVICE.delete(c);
-//		}
-//
-//		// update
-//		for (int i = 0; i < categoryFoods.size(); i++) {
-//			// chua co duoi db
-//			if (categoryFoods.get(i).getId() == null) {
-//				if (!categoryFoods.get(i).getName().isEmpty() && categoryFoods.get(i).getName() != null) {
-//					CategoryFood a = CATEGORY_FOOD_SERVICE.create(categoryFoods.get(i));
-//					if (a != null) {
-//						System.out.println("Thanh cong");
-//					} else {
-//						System.out.println("That bai");
-//					}
-//				}
-//			} else {
-//				CATEGORY_FOOD_SERVICE.update(categoryFoods.get(i));
-//			}
-//		}
-//		categoryFoodsRemove = new ArrayList<>();
-//		CommonService.successNotify();
-//	}
+	// public void saveOrUpdate() {
+	// // remove list deleted
+	// for (CategoryFood c : categoryFoodsRemove) {
+	// CATEGORY_FOOD_SERVICE.delete(c);
+	// }
+	//
+	// // update
+	// for (int i = 0; i < categoryFoods.size(); i++) {
+	// // chua co duoi db
+	// if (categoryFoods.get(i).getId() == null) {
+	// if (!categoryFoods.get(i).getName().isEmpty() &&
+	// categoryFoods.get(i).getName() != null) {
+	// CategoryFood a = CATEGORY_FOOD_SERVICE.create(categoryFoods.get(i));
+	// if (a != null) {
+	// System.out.println("Thanh cong");
+	// } else {
+	// System.out.println("That bai");
+	// }
+	// }
+	// } else {
+	// CATEGORY_FOOD_SERVICE.update(categoryFoods.get(i));
+	// }
+	// }
+	// categoryFoodsRemove = new ArrayList<>();
+	// CommonService.successNotify();
+	// }
 
 	// UPLOAD IMAGE
 
@@ -123,12 +124,16 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 	public void deleteRow(CategoryFood item) {
 		for (CategoryFood food : categoryFoods) {
 			if (food.getId() == item.getId()) {
-				boolean delete = CATEGORY_FOOD_SERVICE.delete(item);
-				if (delete) {
-					categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
-					Notification.NOTI_SUCCESS("Xóa thành công");
-				} else {
-					Notification.NOTI_ERROR("Xóa không thành công");
+				try {
+					boolean delete = CATEGORY_FOOD_SERVICE.delete(item);
+					if (delete) {
+						categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
+						Notification.NOTI_SUCCESS("Xóa thành công");
+					} else {
+						Notification.NOTI_ERROR("Không thể xóa");
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -153,7 +158,7 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 					// truong hop khong co phan tu nao trung -> cap nhat ten
 					CategoryFood cfUpdate = CATEGORY_FOOD_SERVICE.update(cFoodUpdate);
 					if (cfUpdate != null) {
-//						Notification.NOTI_SUCCESS("Thành công");
+						// Notification.NOTI_SUCCESS("Thành công");
 						MessageView.INFO("Thành công");
 						categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
 						cFoodUpdate = new CategoryFood();
@@ -184,22 +189,22 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 			if (checkExistName.isEmpty()) {
 				CategoryFood cfNew = CATEGORY_FOOD_SERVICE.create(cFoodNew);
 				if (cfNew != null) {
-//					Notification.NOTI_SUCCESS("Thành công");
+					// Notification.NOTI_SUCCESS("Thành công");
 					MessageView.INFO("Thành công");
 					categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
 					cFoodNew = new CategoryFood();
 					PrimeFaces current = PrimeFaces.current();
 					current.executeScript("PF('widgetThemMonAn').hide();");
 				} else {
-//					Notification.NOTI_ERROR("Không thành công");
+					// Notification.NOTI_ERROR("Không thành công");
 					MessageView.ERROR("Không thành công");
 				}
 			} else {
-//				Notification.NOTI_ERROR("Tên món ăn đã tồn tại");
+				// Notification.NOTI_ERROR("Tên món ăn đã tồn tại");
 				MessageView.ERROR("Tên món ăn đã tồn tại");
 			}
 		} else {
-//			Notification.NOTI_WARN("Vui lòng điền đầy đủ thông tin");
+			// Notification.NOTI_WARN("Vui lòng điền đầy đủ thông tin");
 			MessageView.ERROR("Vui lòng nhập tên món ăn");
 		}
 	}

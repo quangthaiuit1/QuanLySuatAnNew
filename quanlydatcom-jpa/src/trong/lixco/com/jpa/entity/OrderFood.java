@@ -19,6 +19,15 @@ public class OrderFood extends AbstractEntity {
 	private String employee_id;
 	private String department_code;
 	private String department_name;
+	private boolean is_eated = false;
+
+	public boolean isIs_eated() {
+		return is_eated;
+	}
+
+	public void setIs_eated(boolean is_eated) {
+		this.is_eated = is_eated;
+	}
 
 	public String getDepartment_code() {
 		return department_code;
