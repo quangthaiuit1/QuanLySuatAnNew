@@ -142,11 +142,121 @@ public class DuyetSuatAnTangCa extends AbstractBean<OrderFood> {
 			e.printStackTrace();
 		}
 	}
-	
-	public void saveOrUpdate(){
-		
+
+	public void saveOrUpdate() {
+
 	}
-	
+
+	public void ajaxCheckedDuyetTapped() {
+		List<OverTime> foodOT = OVER_TIME_SERVICE.find(dateSearch, shiftsSelected.getId(), departmentSearch.getCode());
+		// da co
+		if (foodOT.size() != 0) {
+			if (!daDuyet) {
+				return;
+			}
+			if (daDuyet) {
+				foodOT.get(0).setIs_duyet(daDuyet);
+				OVER_TIME_SERVICE.update(foodOT.get(0));
+				List<FoodOverTime> fotsOld = FOOD_OVER_TIME_SERVICE.find(dateSearch, shiftsSelected.getId(),
+						member.getDepartment().getCode());
+				// kiem tra danh sach moi va danh sach cu
+				for (int i = 0; i < employeesCustom.size(); i++) {
+					boolean isExist = false;
+					int indexExist = 0;
+					for (int j = 0; j < fotsOld.size(); j++) {
+						if (employeesCustom.get(i).getEmployeeCode().equals(fotsOld.get(j).getEmployee_code())) {
+							isExist = true;
+							indexExist = j;
+							break;
+						}
+					}
+					// chua co -> them moi
+					if (!isExist && employeesCustom.get(i).isSelect()) {
+						FoodOverTime fotNew = new FoodOverTime();
+						fotNew.setEmployee_code(employeesCustom.get(i).getEmployeeCode());
+						fotNew.setEmployee_name(employeesCustom.get(i).getEmployeeName());
+						fotNew.setOver_time(foodOT.get(0));
+						fotNew.setCreatedDate(new Date());
+						FOOD_OVER_TIME_SERVICE.create(fotNew);
+					}
+					// khong duoc chon nhung da co duoi db -> xoa
+					if (isExist && !employeesCustom.get(i).isSelect()) {
+						FOOD_OVER_TIME_SERVICE.delete(fotsOld.get(indexExist));
+					}
+				}
+				// handle list update view
+				List<FoodOverTime> otsAfterHandle = FOOD_OVER_TIME_SERVICE.find(dateSearch, shiftsSelected.getId(),
+						member.getDepartment().getCode());
+				for (int i = 0; i < otsAfterHandle.size(); i++) {
+					for (int j = 0; j < employeesCustom.size(); j++) {
+						if (otsAfterHandle.get(i).getEmployee_code().equals(employeesCustom.get(j).getEmployeeCode())) {
+							employeesCustom.get(j).setSelect(true);
+						}
+					}
+				}
+				MessageView.INFO("Thành công");
+				return;
+			}
+		}
+		// chua co
+		else {
+			// tim danh sach nv tang ca
+			List<EmployeeThai> employeesSelected = new ArrayList<>();
+			for (int i = 0; i < employeesCustom.size(); i++) {
+				if (employeesCustom.get(i).isSelect()) {
+					employeesSelected.add(employeesCustom.get(i));
+				}
+			}
+			// neu nut duyet duoc check
+			if (daDuyet && employeesSelected.size() == 0) {
+				Notification.NOTI_ERROR("Vui lòng chọn nhân viên");
+			}
+			if (daDuyet && employeesSelected.size() != 0) {
+				OverTime overTimeTemp = new OverTime();
+				overTimeTemp.setCreatedDate(new Date());
+				overTimeTemp.setCreatedUser(member.getCode());
+				overTimeTemp.setDepartment_code(employeesSelected.get(0).getDepartmentCode());
+				overTimeTemp.setDepartment_name(employeesSelected.get(0).getDepartmentName());
+				overTimeTemp.setFood_date(dateSearch);
+				overTimeTemp.setShifts(shiftsSelected);
+				if (daDuyet) {
+					overTimeTemp.setIs_duyet(true);
+				}
+				OverTime entityNew = OVER_TIME_SERVICE.create(overTimeTemp);
+				if (entityNew != null) {
+					for (int j = 0; j < employeesSelected.size(); j++) {
+						FoodOverTime foodOTTemp = new FoodOverTime();
+						foodOTTemp.setEmployee_code(employeesSelected.get(j).getEmployeeCode());
+						foodOTTemp.setEmployee_name(employeesSelected.get(j).getEmployeeName());
+						foodOTTemp.setOver_time(entityNew);
+						FoodOverTime checkCreate = FOOD_OVER_TIME_SERVICE.create(foodOTTemp);
+						if (checkCreate == null) {
+							Notification.NOTI_ERROR("Lỗi");
+							return;
+						}
+					}
+					List<FoodOverTime> otsAfterHandle = FOOD_OVER_TIME_SERVICE.find(dateSearch, shiftsSelected.getId(),
+							member.getDepartment().getCode());
+					// handle list update view
+					for (int i = 0; i < otsAfterHandle.size(); i++) {
+						for (int j = 0; j < employeesCustom.size(); j++) {
+							if (otsAfterHandle.get(i).getEmployee_code()
+									.equals(employeesCustom.get(j).getEmployeeCode())) {
+								employeesCustom.get(j).setSelect(true);
+							}
+						}
+					}
+					MessageView.INFO("Thành công");
+					return;
+				}
+				// khong them duoc
+				if (entityNew == null) {
+					Notification.NOTI_ERROR("Lỗi");
+					return;
+				}
+			}
+		}
+	}
 
 	public void saveOrUpdateManager() {
 		// handle xoa toan bo list cu -> add lai list moi

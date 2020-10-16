@@ -103,15 +103,13 @@
 				scrollable="true" id="dtSuatTangCaTP1"
 				filteredValue="#{duyetSuatAnTangCa.employeesCustomFilters}">
 				<f:facet name="header">
-					<p:commandButton
-						action="#{duyetSuatAnTangCa.saveOrUpdateManager()}"
-						value="Lưu/cập nhật" style="float:right" icon="ui-icon-update"
-						update=":formDuyetTangCa:growlDuyetTangCa,dtSuatTangCaTP1:checkboxDaDuyet"
-						styleClass="btsearch" />
 					<p:selectBooleanCheckbox value="#{duyetSuatAnTangCa.daDuyet}"
 						itemLabel="Duyệt ĐK"
 						style="float:right;margin-right:20px;font-size:15px;margin-top:5px"
 						styleClass="none">
+						<p:ajax process="@this"
+							listener="#{duyetSuatAnTangCa.ajaxCheckedDuyetTapped()}"
+							update="checkboxDaDuyet,dtSuatTangCaTP1,formDuyetTangCa:growlDuyetTangCa" />
 					</p:selectBooleanCheckbox>
 
 					<div style="clear: both;" />

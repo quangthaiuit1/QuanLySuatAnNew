@@ -44,7 +44,6 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 	private int Shifts = 1;
 	private Shifts shiftsSelected;
 	private List<Shifts> allShifts;
-	private boolean daDuyet = false;
 	private Member member;
 	private List<Member> members;
 	private boolean daDuyetSuatAnView = false;
@@ -103,7 +102,8 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 
 	public void searchItem() {
 		try {
-			daDuyet = false;
+			// daDuyet = false;
+			daDuyetSuatAnView = false;
 			employeesThai = new ArrayList<>();
 			// handle nhan vien da chon
 			List<FoodOverTime> foodOT = FOOD_OVER_TIME_SERVICE.find(dateSearch, shiftsSelected.getId(),
@@ -112,7 +112,7 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 			if (foodOT.size() != 0) {
 				if (foodOT.get(0).getOver_time().isIs_duyet()) {
 					daDuyetSuatAnView = true;
-					daDuyet = true;
+					// daDuyet = true;
 				}
 			}
 			// handle hien toan bo danh sach nhan vien
@@ -120,20 +120,22 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 			departmentsString.add(departmentSearch.getCode());
 			String[] departmentsStringArr = departmentsString.toArray(new String[departmentsString.size()]);
 			EmployeeDTO[] employeesArray = EMPLOYEE_SERVICE_PUBLIC.findByDep(departmentsStringArr);
-			for (int i = 0; i < employeesArray.length; i++) {
-				EmployeeThai employeeTemp = new EmployeeThai();
-				employeeTemp.setEmployeeCode(employeesArray[i].getCode());
-				employeeTemp.setEmployeeName(employeesArray[i].getName());
-				employeeTemp.setDepartmentCode(employeesArray[i].getCodeDepart());
-				employeeTemp.setDepartmentName(employeesArray[i].getNameDepart());
-				employeesThai.add(employeeTemp);
-			}
-			if (employeesThai.size() != 0) {
-				for (int i = 0; i < foodOT.size(); i++) {
-					for (int j = 0; j < employeesThai.size(); j++) {
-						if (foodOT.get(i).getEmployee_code().equals(employeesThai.get(j).getEmployeeCode())) {
-							employeesThai.get(j).setSelect(true);
-							break;
+			if (employeesArray != null) {
+				for (int i = 0; i < employeesArray.length; i++) {
+					EmployeeThai employeeTemp = new EmployeeThai();
+					employeeTemp.setEmployeeCode(employeesArray[i].getCode());
+					employeeTemp.setEmployeeName(employeesArray[i].getName());
+					employeeTemp.setDepartmentCode(employeesArray[i].getCodeDepart());
+					employeeTemp.setDepartmentName(employeesArray[i].getNameDepart());
+					employeesThai.add(employeeTemp);
+				}
+				if (employeesThai.size() != 0) {
+					for (int i = 0; i < foodOT.size(); i++) {
+						for (int j = 0; j < employeesThai.size(); j++) {
+							if (foodOT.get(i).getEmployee_code().equals(employeesThai.get(j).getEmployeeCode())) {
+								employeesThai.get(j).setSelect(true);
+								break;
+							}
 						}
 					}
 				}
@@ -141,7 +143,6 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	public void saveOrUpdate() {
@@ -177,7 +178,7 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 			overTimeTemp.setDepartment_name(listEmployeeSelected.get(0).getDepartmentName());
 			overTimeTemp.setFood_date(dateSearch);
 			overTimeTemp.setShifts(shiftsSelected);
-			if (daDuyet) {
+			if (daDuyetSuatAnView) {
 				overTimeTemp.setIs_duyet(true);
 			}
 			entityNew = OVER_TIME_SERVICE.create(overTimeTemp);
@@ -200,12 +201,6 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 				return;
 			}
 		}
-		// if (daDuyet) {
-		// daDuyetSuatAnView = true;
-		// } else {
-		// daDuyetSuatAnView = false;
-		// }
-		// Notification.NOTI_SUCCESS("Thành công");
 		MessageView.INFO("Thành công");
 	}
 
@@ -268,14 +263,6 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 
 	public void setAllShifts(List<Shifts> allShifts) {
 		this.allShifts = allShifts;
-	}
-
-	public boolean isDaDuyet() {
-		return daDuyet;
-	}
-
-	public void setDaDuyet(boolean daDuyet) {
-		this.daDuyet = daDuyet;
 	}
 
 	public boolean isDaDuyetSuatAnView() {
