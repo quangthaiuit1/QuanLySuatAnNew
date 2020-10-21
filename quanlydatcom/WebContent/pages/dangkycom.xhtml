@@ -512,7 +512,7 @@
 								<center>
 									<p:commandLink value="Xóa"
 										action="#{dangKyComBean.deleteOrderFood(item)}"
-										update=":formDetail:dtFoodShifts1,:detail:growlXoaMonAn"
+										update=":formDetail:dtFoodShifts1,:detail:growlXoaMonAn,:detail:dtOrderFood"
 										style="color: red;font-style: italic;text-decoration: underline;" />
 								</center>
 							</p:column>
@@ -545,7 +545,7 @@
 								filterFunction="customFilter">
 								<p:ajax process="@this"
 									listener="#{dangKyComBean.ajaxHandleShowFoodByShifts()}"
-									update=":formChooseFood:dtFoodShifts1,:formChooseFood:kdgtc" />
+									update=":formChooseFood:dtFoodShifts1,:formChooseFood:kdgtc,:formDetail:growlDetail" />
 								<f:selectItems value="#{dangKyComBean.allShift}" var="loop"
 									itemLabel="#{loop.name}" itemValue="#{loop}" />
 								<p:column>

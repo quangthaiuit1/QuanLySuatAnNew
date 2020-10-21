@@ -212,6 +212,16 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 	// xoa mon an
 	public void deleteOrderFood(OrderAndFoodByDate itemSelected) {
 		boolean isCurrent = false;
+		// list order food tu DB
+		java.sql.Date start = new java.sql.Date(startDate.getTime());
+		java.sql.Date end = new java.sql.Date(endDate.getTime());
+
+		boolean isExpired = isExpired(itemSelected.getFood_by_day());
+		if (isExpired) {
+			// Notification.NOTI_WARN("Hết hạn đăng ký món ăn");
+			MessageView.ERROR("Đã hết hạn xóa suất ăn");
+			return;
+		}
 		try {
 			isCurrent = isDateCurrent(itemSelected.getFood_by_day().getFood_date());
 		} catch (Exception e) {
@@ -222,14 +232,23 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 			MessageView.ERROR("Không được xóa sau 14:30 ngày hôm trước");
 			return;
 		}
-
 		// kiem tra xem item duoc xoa -> ngay co nho hon hoac bang ngay hien tai
 		// khong
 		boolean checkDeleted = ORDER_AND_FOOD_BY_DATE_SERVICE.delete(itemSelected);
 		if (checkDeleted) {
 			java.sql.Date abc = new java.sql.Date(itemSelected.getOrder_food().getRegistration_date().getTime());
 			ofsByDate = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(abc, member.getCode());
-			Notification.NOTI_SUCCESS("Xóa thành công");
+			// update view
+			try {
+				if (startDate != null && endDate != null) {
+					orderFoods = ORDER_FOOD_SERVICE.findByDayToDay(start, end, member.getCode());
+					resetData(this.orderFoods);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			// Notification.NOTI_SUCCESS("Xóa thành công");
+			MessageView.INFO("Xóa thành công");
 			return;
 		} else {
 			Notification.NOTI_ERROR("Lỗi");
@@ -266,7 +285,7 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 			if (!employee.isWorkShift() && shiftsSelected.getId() == ShiftsUtil.SHIFTS3_ID) {
 				PrimeFaces current = PrimeFaces.current();
 				current.executeScript("PF('wdvDialogChooseFood').hide();");
-				Notification.NOTI_ERROR("Không được đăng ký");
+				MessageView.ERROR("Không được đăng ký");
 				return;
 			}
 			java.sql.Date date = new java.sql.Date(orderfoodSelected.getRegistration_date().getTime());
@@ -348,8 +367,14 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 					if (ofTemps.get(j).getRegistration_date().getDate() == orderFoodsTemp.get(i).getRegistration_date()
 							.getDate()) {
 						check = true;
-						orderFoods.get(j).setIs_eated(true);
-						break;
+						// check coi trong bang chi tiet co dang ky suat an nao
+						// hay khong
+						List<OrderAndFoodByDate> ofsCheck = ORDER_AND_FOOD_BY_DATE_SERVICE
+								.findByShiftsId(ofTemps.get(j).getId(), 0);
+						if (ofsCheck.size() != 0) {
+							orderFoods.get(j).setIs_eated(true);
+							break;
+						}
 					}
 				}
 			}
@@ -405,6 +430,9 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 			// ktra co phai ngay hien tai khong?
 
 			boolean isCurrent = false;
+			// list order food tu DB
+			java.sql.Date start = new java.sql.Date(startDate.getTime());
+			java.sql.Date end = new java.sql.Date(endDate.getTime());
 			try {
 				isCurrent = isDateCurrent(food1Selected.getFood_date());
 			} catch (Exception e) {
@@ -456,6 +484,16 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 											orderfoodSelected.getRegistration_date().getTime());
 									// cap nhat lai list moi -> phan tu vua them
 									ofsByDate = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(abc, member.getCode());
+									// update view
+									try {
+										if (startDate != null && endDate != null) {
+											orderFoods = ORDER_FOOD_SERVICE.findByDayToDay(start, end,
+													member.getCode());
+											resetData(this.orderFoods);
+										}
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
 									MessageView.INFO("Thành công");
 									return;
 								} else {
@@ -480,6 +518,16 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 											orderfoodSelected.getRegistration_date().getTime());
 									ofsByDate = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(abc, member.getCode());
 									// Notification.NOTI_SUCCESS("Thành công");
+									// update view
+									try {
+										if (startDate != null && endDate != null) {
+											orderFoods = ORDER_FOOD_SERVICE.findByDayToDay(start, end,
+													member.getCode());
+											resetData(this.orderFoods);
+										}
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
 									MessageView.INFO("Thành công");
 									return;
 								} else {
@@ -508,10 +556,6 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 								// Handle load lai data tren view
 								try {
 									if (startDate != null && endDate != null) {
-										// list order food tu DB
-										java.sql.Date start = new java.sql.Date(startDate.getTime());
-										java.sql.Date end = new java.sql.Date(endDate.getTime());
-
 										orderFoods = ORDER_FOOD_SERVICE.findByDayToDay(start, end, member.getCode());
 										resetData(this.orderFoods);
 									}

@@ -162,7 +162,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 		toDateAte = currentDate00;
 
 		dateSearchExactly = currentDate00;
-		checkedRenderView = new boolean[9];
+		checkedRenderView = new boolean[10];
 		for (int i = 0; i < checkedRenderView.length; i++) {
 			checkedRenderView[i] = false;
 		}
@@ -176,7 +176,8 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 			checkedRenderView[i] = false;
 		}
 		if (valueChecked != 0) {
-			for (int i = 1; i < 8; i++) {
+			// thay i < tai day
+			for (int i = 1; i < 9; i++) {
 				if (valueChecked == i) {
 					checkedRenderView[i - 1] = true;
 				} else {
@@ -330,6 +331,131 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	// tong hop toan bo can bo CNV cong ty
+	public void baoCaoNVKhongAnExcel() throws IOException {
+		PrimeFaces.current().executeScript("PF('pbClient').start();");
+		String nameSheet = "";
+		Date dateSearchWithoutTime = DateUtil.DATE_WITHOUT_TIME(fromDateAte);
+		if (shiftsSelected.getId() == ShiftsUtil.SHIFTS1_ID) {
+			nameSheet = "DS NV " + ShiftsUtil.SHIFTS1_NAME + " Ngay " + formatter.format(dateSearch);
+		}
+		if (shiftsSelected.getId() == ShiftsUtil.SHIFTS2_ID) {
+			nameSheet = "DS NV " + ShiftsUtil.SHIFTS2_NAME + " Ngay " + formatter.format(dateSearch);
+		}
+		if (shiftsSelected.getId() == ShiftsUtil.SHIFTS3_ID) {
+			nameSheet = "DS NV " + ShiftsUtil.SHIFTS2_NAME + " Ngay " + formatter.format(dateSearch);
+		}
+
+		List<OrderAndFoodByDate> odfbds = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDate(dateSearchWithoutTime,
+				shiftsSelected.getId());
+
+		List<FoodNhaAn> listDaAn = FOOD_NHA_AN_SERVICE.findByDate(dateSearchWithoutTime, shiftsSelected.getId());
+		List<OrderAndFoodByDate> odfbdsAfterFilter = new ArrayList<>();
+		for (int i = 0; i < odfbds.size(); i++) {
+			boolean isEat = false;
+			for (int j = 0; j < listDaAn.size(); j++) {
+				if (odfbds.get(i).getOrder_food().getEmployeeCode().equals(listDaAn.get(j).getEmployee_code())) {
+					isEat = true;
+					break;
+				}
+			}
+			if (!isEat) {
+				odfbdsAfterFilter.add(odfbds.get(i));
+			}
+		}
+
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		XSSFSheet sheet = null;
+		sheet = workbook.createSheet(nameSheet);
+
+		int rownum = 0;
+		Cell cell;
+		Row row;
+		XSSFCellStyle style = createStyleForTitle(workbook);
+		style.setAlignment(CellStyle.ALIGN_CENTER);
+
+		// cell style for date
+		XSSFCellStyle cellStyleDate = workbook.createCellStyle();
+		CreationHelper createHelper = workbook.getCreationHelper();
+		cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+
+		row = sheet.createRow(rownum);
+
+		// EmpNo
+		cell = row.createCell(0);
+		cell.setCellValue("Mã NV");
+		// xep loai// EmpName
+		cell = row.createCell(1);
+		cell.setCellValue("Tên NV");
+		cell.setCellStyle(style);
+		// Salary
+		cell = row.createCell(2);
+		cell.setCellValue("Phòng ban");
+		cell.setCellStyle(style);
+
+		cell = row.createCell(3);
+		cell.setCellValue("Ngày");
+		cell.setCellStyle(style);
+
+		// Grade
+		cell = row.createCell(4);
+		cell.setCellValue("Giờ ăn");
+		cell.setCellStyle(style);
+		// Bonus
+		cell = row.createCell(5);
+		cell.setCellValue("Tên món");
+		cell.setCellStyle(style);
+		// xep loai
+
+		// Data
+		if (!odfbdsAfterFilter.isEmpty()) {
+			for (OrderAndFoodByDate f : odfbdsAfterFilter) {
+				// Gson gson = new Gson();
+				rownum++;
+				row = sheet.createRow(rownum);
+
+				// Tim nhan vien
+				EmployeeDTO employeeTemp = EMPLOYEE_SERVICE_PUBLIC.findByCode(f.getOrder_food().getEmployeeCode());
+				if (employeeTemp != null) {
+					// ma nhan vien
+					cell = row.createCell(0);
+					cell.setCellValue(employeeTemp.getCode());
+					// ten nhan vien
+					cell = row.createCell(1);
+					cell.setCellValue(employeeTemp.getName());
+				}
+				// phong
+				Department departmentTemp = DEPARTMENT_SERVICE_PUBLIC.findByCode("code",
+						f.getOrder_food().getDepartment_code());
+
+				if (departmentTemp != null) {
+					// ten phong ban
+					cell = row.createCell(2);
+					cell.setCellValue(departmentTemp.getName());
+				}
+				// ngay
+				cell = row.createCell(3);
+				cell.setCellValue(f.getOrder_food().getRegistration_date());
+				cell.setCellStyle(cellStyleDate);
+				// ten ca lam viec
+				cell = row.createCell(4);
+				cell.setCellValue(f.getFood_by_day().getShifts().getName());
+				// ten mon an
+				cell = row.createCell(5);
+				cell.setCellValue(f.getFood_by_day().getCategory_food().getName());
+			}
+		}
+
+		String filename = "DSNVKhongAn.xlsx";
+		FacesContext facesContext = FacesContext.getCurrentInstance();
+		ExternalContext externalContext = facesContext.getExternalContext();
+		externalContext.setResponseContentType("application/vnd.ms-excel");
+		externalContext.setResponseHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+		workbook.write(externalContext.getResponseOutputStream());
+		// cancel progress
+		facesContext.responseComplete();
 	}
 
 	// handle suat an khach
@@ -965,7 +1091,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 
 		// Grade
 		cell = row.createCell(4);
-		cell.setCellValue("Ca làm việc");
+		cell.setCellValue("Giờ ăn");
 		cell.setCellStyle(style);
 		// Bonus
 		cell = row.createCell(5);
@@ -1470,6 +1596,41 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 				shiftsName = ShiftsUtil.SHIFTS1_NAME;
 				// 8C la ca sang 6h->6h toi // gom nv van phong va cong nhan
 				arr = TimekeepingDataService.timtheongay(dateSearchString);
+
+				// System.out.println("arr: " + arr.length);
+				//
+				// TimekeepingData[] arrCD =
+				// TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString,
+				// "CD");
+				// if (arrCD != null) {
+				// System.out.println("arrCD: " + arrCD.length);
+				// }
+				//
+				// TimekeepingData[] arr8C =
+				// TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString,
+				// "8C");
+				// if (arr8C != null) {
+				// System.out.println("arr8C: " + arr8C.length);
+				// }
+
+				// loc ra nhan vien di ca CD
+				// List<TimekeepingData> arrAfterFilter = new ArrayList<>();
+				// for (int i = 0; i < arr.length; i++) {
+				// // if (arr[i].getWorkTemp() == null) {
+				// // System.out.println("index: " + i);
+				// // System.out.println(arr[i].getCode());
+				// // }
+				// if (arr[i].getWorkTemp() != null &&
+				// !arr[i].getWorkTemp().equals("CD")) {
+				// arrAfterFilter.add(arr[i]);
+				// }
+				// // if (arr[i].getWorkTemp() != null &&
+				// // arr[i].getWorkTemp().equals("CD")) {
+				// // System.out.println("CD: " + arr[i].getCode());
+				// // }
+				// }
+				// arr = arrAfterFilter.toArray(new
+				// TimekeepingData[arrAfterFilter.size()]);
 			}
 			if (shiftsSelected.getId() == ShiftsUtil.SHIFTS2_ID) {
 				shiftsName = ShiftsUtil.SHIFTS2_NAME;

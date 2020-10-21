@@ -56,7 +56,11 @@ public class AuthorServlet extends HttpServlet {
 						if (allow) {
 							response.sendRedirect(pathlocal + "/quanlydatcom/pages/home.htm");
 						} else {
-							response.sendRedirect(pathlocal + "/quanlydatcom/pages/dangkycom.htm");
+							if (request.getHeader("User-Agent").indexOf("Mobi") != -1) {
+								response.sendRedirect(pathlocal + "/quanlydatcom/pages/dangkycommobile.htm");
+							} else {
+								response.sendRedirect(pathlocal + "/quanlydatcom/pages/dangkycom.htm");
+							}
 						}
 					}
 				} else {

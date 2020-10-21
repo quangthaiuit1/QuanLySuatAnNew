@@ -97,6 +97,9 @@
 						<f:selectItem
 							itemLabel="Báo cáo tổng hợp chênh lệch suất ăn chính xác và thực tế"
 							itemValue="7" />
+						<f:selectItem
+							itemLabel="Danh sách NV không ăn cơm (có đăng ký)"
+							itemValue="8" />
 						<p:ajax listener="#{baoCaoBean.handleRenderView()}"
 							process="@this" />
 					</p:selectOneMenu>
@@ -507,6 +510,62 @@
 					</div>
 				</div>
 				<!-- End code new -->
+			</p:fieldset>
+
+			<!-- DANH SACH NV DK COM NHUNG KHONG AN -->
+			<p:fieldset rendered="#{baoCaoBean.checkedRenderView[7]}"
+				style="height: 330px">
+				<div class="
+				ui-g" style="width: 100%">
+					<h3>Báo cáo tổng hợp danh sách nhân viên không ăn cơm (có
+						đăng ký)</h3>
+				</div>
+				<div class="ui-g">
+					<p:separator style="width:100%;float:left" />
+				</div>
+
+				<!-- Code new -->
+				<div class="ui-g-9" style="margin-left: 17%">
+					<div class="ui-g">
+						<div class="ui-g-3">
+							<p:fieldset id="fieldsetKhongAn" legend="Ngày:"
+								styleClass="noneformatfs" style=" height:60px">
+								<p:calendar styleClass="stwidth" locale="vi"
+									value="#{baoCaoBean.fromDateAte}" id="dateSearchKhongAn"
+									pattern="#{applicationBean.cf.formatDate}"
+									showButtonPanel="true" navigator="true"
+									mask="#{applicationBean.cf.maskDate}" />
+							</p:fieldset>
+						</div>
+						<div class="ui-g-3">
+							<p:fieldset id="fieldsetShiftsKhongAn" legend="Chọn ca"
+								styleClass="noneformatfs" style="width:100%; height:60px">
+								<p:selectOneMenu value="#{baoCaoBean.shiftsSelected}"
+									converter="abstractConverter" effect="fade" var="t"
+									style="width:150px;" id="selectCaKhongAn" filter="true"
+									filterMatchMode="custom" filterFunction="customFilter">
+									<f:selectItems value="#{baoCaoBean.allShifts}" var="item"
+										itemLabel="#{item.name}" itemValue="#{item}" />
+									<p:column>
+										<h:outputText value="#{t.name}" escape="false" />
+									</p:column>
+								</p:selectOneMenu>
+							</p:fieldset>
+						</div>
+						<div class="ui-g-6">
+							<p:fieldset
+								style=" width:80%;margin-left:4%;height:50px;margin-top:10px"
+								styleClass="noneformatfs">
+								<p:commandButton style="float:right;margin-top:10px"
+									styleClass="btsearch" type="submit" value="Xuất PDF"
+									ajax="false"
+									actionListener="#{baoCaoBean.baoCaoNVKhongAnExcel()}"
+									onclick="this.form.target='_blank'" />
+							</p:fieldset>
+						</div>
+					</div>
+				</div>
+				<!-- End DANH SACH NV DK COM NHUNG KHONG AN -->
 			</p:fieldset>
 		</h:form>
 		<!-- DIALOG HANDLE SHOW CHI TIET -->

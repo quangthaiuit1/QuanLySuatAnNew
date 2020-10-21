@@ -44,7 +44,7 @@ public class FoodNhaAnService extends AbstractService<FoodNhaAn> {
 		return ct;
 	}
 
-	public List<FoodNhaAn> findByDate(java.util.Date dateSearch, int shifts) {
+	public List<FoodNhaAn> findByDate(java.util.Date dateSearch, long shiftsId) {
 		// primary
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<FoodNhaAn> cq = cb.createQuery(FoodNhaAn.class);
@@ -54,8 +54,8 @@ public class FoodNhaAnService extends AbstractService<FoodNhaAn> {
 			Predicate dateQuery = cb.equal(root.get("food_date"), dateSearch);
 			queries.add(dateQuery);
 		}
-		if (shifts != 0) {
-			Predicate shiftsQuery = cb.equal(root.get("shifts"), shifts);
+		if (shiftsId != 0) {
+			Predicate shiftsQuery = cb.equal(root.get("shifts").get("id"), shiftsId);
 			queries.add(shiftsQuery);
 		}
 
@@ -145,76 +145,80 @@ public class FoodNhaAnService extends AbstractService<FoodNhaAn> {
 		}
 	}
 
-//	// find tu ngay den ngay
-//	public List<FoodNhaAn> findByDayToDaySortByDateAndFoodName(java.util.Date firstDay, java.util.Date lastDay,
-//			String departmentCode) {
-//		// primary
-//		CriteriaBuilder cb = em.getCriteriaBuilder();
-//		CriteriaQuery<FoodNhaAn> cq = cb.createQuery(FoodNhaAn.class);
-//		Root<FoodNhaAn> root = cq.from(FoodNhaAn.class);
-//		List<Predicate> queries = new ArrayList<>();
-//		if (firstDay != null) {
-//			Predicate resultQueryFirst = cb.greaterThanOrEqualTo(root.get("food_date"), firstDay);
-//			queries.add(resultQueryFirst);
-//		}
-//		if (lastDay != null) {
-//			Predicate resultQueryLast = cb.lessThanOrEqualTo(root.get("food_date"), lastDay);
-//			queries.add(resultQueryLast);
-//		}
-//		if (departmentCode != null) {
-//			Predicate resultQueryDepartCode = cb.equal(root.get("department_code"), departmentCode);
-//			queries.add(resultQueryDepartCode);
-//		}
-//		Predicate data[] = new Predicate[queries.size()];
-//		for (int i = 0; i < queries.size(); i++) {
-//			data[i] = queries.get(i);
-//		}
-//		Predicate finalPredicate = cb.and(data);
-//		cq.select(root).where(finalPredicate).orderBy(cb.asc(root.get("food_date")),
-//				cb.asc(root.get("category_food").get("name")));
-//		TypedQuery<FoodNhaAn> query = em.createQuery(cq);
-//		List<FoodNhaAn> results = query.getResultList();
-//		if (!results.isEmpty()) {
-//			return results;
-//		} else {
-//			return new ArrayList<FoodNhaAn>();
-//		}
-//	}
-	
+	// // find tu ngay den ngay
+	// public List<FoodNhaAn> findByDayToDaySortByDateAndFoodName(java.util.Date
+	// firstDay, java.util.Date lastDay,
+	// String departmentCode) {
+	// // primary
+	// CriteriaBuilder cb = em.getCriteriaBuilder();
+	// CriteriaQuery<FoodNhaAn> cq = cb.createQuery(FoodNhaAn.class);
+	// Root<FoodNhaAn> root = cq.from(FoodNhaAn.class);
+	// List<Predicate> queries = new ArrayList<>();
+	// if (firstDay != null) {
+	// Predicate resultQueryFirst =
+	// cb.greaterThanOrEqualTo(root.get("food_date"), firstDay);
+	// queries.add(resultQueryFirst);
+	// }
+	// if (lastDay != null) {
+	// Predicate resultQueryLast = cb.lessThanOrEqualTo(root.get("food_date"),
+	// lastDay);
+	// queries.add(resultQueryLast);
+	// }
+	// if (departmentCode != null) {
+	// Predicate resultQueryDepartCode = cb.equal(root.get("department_code"),
+	// departmentCode);
+	// queries.add(resultQueryDepartCode);
+	// }
+	// Predicate data[] = new Predicate[queries.size()];
+	// for (int i = 0; i < queries.size(); i++) {
+	// data[i] = queries.get(i);
+	// }
+	// Predicate finalPredicate = cb.and(data);
+	// cq.select(root).where(finalPredicate).orderBy(cb.asc(root.get("food_date")),
+	// cb.asc(root.get("category_food").get("name")));
+	// TypedQuery<FoodNhaAn> query = em.createQuery(cq);
+	// List<FoodNhaAn> results = query.getResultList();
+	// if (!results.isEmpty()) {
+	// return results;
+	// } else {
+	// return new ArrayList<FoodNhaAn>();
+	// }
+	// }
+
 	// find tu ngay den ngay
-		public List<FoodNhaAn> findByDayToDaySortByDateAndShiftsAndFoodName(java.util.Date firstDay, java.util.Date lastDay,
-				String departmentCode) {
-			// primary
-			CriteriaBuilder cb = em.getCriteriaBuilder();
-			CriteriaQuery<FoodNhaAn> cq = cb.createQuery(FoodNhaAn.class);
-			Root<FoodNhaAn> root = cq.from(FoodNhaAn.class);
-			List<Predicate> queries = new ArrayList<>();
-			if (firstDay != null) {
-				Predicate resultQueryFirst = cb.greaterThanOrEqualTo(root.get("food_date"), firstDay);
-				queries.add(resultQueryFirst);
-			}
-			if (lastDay != null) {
-				Predicate resultQueryLast = cb.lessThanOrEqualTo(root.get("food_date"), lastDay);
-				queries.add(resultQueryLast);
-			}
-			if (departmentCode != null) {
-				Predicate resultQueryDepartCode = cb.equal(root.get("department_code"), departmentCode);
-				queries.add(resultQueryDepartCode);
-			}
-			Predicate data[] = new Predicate[queries.size()];
-			for (int i = 0; i < queries.size(); i++) {
-				data[i] = queries.get(i);
-			}
-			Predicate finalPredicate = cb.and(data);
-			cq.select(root).where(finalPredicate).orderBy(cb.asc(root.get("food_date")),
-					cb.asc(root.get("shifts").get("id")),cb.asc(root.get("category_food").get("name")));
-			TypedQuery<FoodNhaAn> query = em.createQuery(cq);
-			List<FoodNhaAn> results = query.getResultList();
-			if (!results.isEmpty()) {
-				return results;
-			} else {
-				return new ArrayList<FoodNhaAn>();
-			}
+	public List<FoodNhaAn> findByDayToDaySortByDateAndShiftsAndFoodName(java.util.Date firstDay, java.util.Date lastDay,
+			String departmentCode) {
+		// primary
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<FoodNhaAn> cq = cb.createQuery(FoodNhaAn.class);
+		Root<FoodNhaAn> root = cq.from(FoodNhaAn.class);
+		List<Predicate> queries = new ArrayList<>();
+		if (firstDay != null) {
+			Predicate resultQueryFirst = cb.greaterThanOrEqualTo(root.get("food_date"), firstDay);
+			queries.add(resultQueryFirst);
 		}
+		if (lastDay != null) {
+			Predicate resultQueryLast = cb.lessThanOrEqualTo(root.get("food_date"), lastDay);
+			queries.add(resultQueryLast);
+		}
+		if (departmentCode != null) {
+			Predicate resultQueryDepartCode = cb.equal(root.get("department_code"), departmentCode);
+			queries.add(resultQueryDepartCode);
+		}
+		Predicate data[] = new Predicate[queries.size()];
+		for (int i = 0; i < queries.size(); i++) {
+			data[i] = queries.get(i);
+		}
+		Predicate finalPredicate = cb.and(data);
+		cq.select(root).where(finalPredicate).orderBy(cb.asc(root.get("food_date")),
+				cb.asc(root.get("shifts").get("id")), cb.asc(root.get("category_food").get("name")));
+		TypedQuery<FoodNhaAn> query = em.createQuery(cq);
+		List<FoodNhaAn> results = query.getResultList();
+		if (!results.isEmpty()) {
+			return results;
+		} else {
+			return new ArrayList<FoodNhaAn>();
+		}
+	}
 
 }

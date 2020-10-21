@@ -70,6 +70,7 @@ public class AuthorizationManager implements Serializable {
 		uriUnprotected = new ArrayList<String>();
 		uriUnprotected.add("/quanlydatcom/pages/home.htm");
 		uriUnprotected.add("/quanlydatcom/pages/dangkycom.htm");
+		uriUnprotected.add("/quanlydatcom/pages/dangkycommobile.htm");
 	}
 
 	public Program getProgram() {
