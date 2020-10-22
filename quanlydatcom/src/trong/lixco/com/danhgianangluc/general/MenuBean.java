@@ -9,7 +9,9 @@ import java.util.List;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
 
 import org.jboss.logging.Logger;
 import org.primefaces.model.menu.DefaultMenuItem;
@@ -25,6 +27,7 @@ import trong.lixco.com.account.servicepublics.Program;
 import trong.lixco.com.account.servicepublics.ProgramServicePublic;
 import trong.lixco.com.account.servicepublics.ProgramServicePublicProxy;
 import trong.lixco.com.bean.AbstractBean;
+import trong.lixco.com.bean.staticentity.DetectDevice;
 import trong.lixco.com.jpa.entity.AbstractEntity;
 import trong.lixco.com.util.NameSytem;
 
@@ -77,8 +80,25 @@ public class MenuBean extends AbstractBean<AbstractEntity> {
 				}
 			}
 			model = new DefaultMenuModel();
-			createMenu(menus);
-		} catch (Exception e) {
+			// Menu tam thoi de xac minh mobile hay desktop
+			List<Menu> menusTemp = new ArrayList<>();
+			for (int i = 0; i < menus.size(); i++) {
+				HttpSession session = (HttpSession) FacesContext.getCurrentInstance().getExternalContext()
+						.getSession(false);
+				Boolean isMobile = (Boolean) session.getAttribute("isMobile");
+				// khong phai mobile
+				if (!isMobile && !menus.get(i).getUrl().equals("/quanlydatcom/pages/dangkycommobile.htm")) {
+					menusTemp.add(menus.get(i));
+				}
+				// mobile
+				if (isMobile && !menus.get(i).getUrl().equals("/quanlydatcom/pages/dangkycom.htm")) {
+					menusTemp.add(menus.get(i));
+				}
+			}
+			createMenu(menusTemp);
+		} catch (
+
+		Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -86,9 +106,11 @@ public class MenuBean extends AbstractBean<AbstractEntity> {
 	/**
 	 * Xay dung he thong menu hien thi cho moi chuong trinh
 	 * 
-	 * @param menus : lay he danh sach menu cua tat ca cac chuong trinh
+	 * @param menus
+	 *            : lay he danh sach menu cua tat ca cac chuong trinh
 	 */
 	public void createMenu(List<Menu> menus) {
+
 		for (Menu menu : menus) {
 			if (menu.getParent() == null) {
 				boolean statusSubmenu = false;
@@ -127,7 +149,8 @@ public class MenuBean extends AbstractBean<AbstractEntity> {
 	/**
 	 * Ham cai dat cho menu he thong Ham goi de quy de tim tat ca cac menu con
 	 * 
-	 * @param menu : menu cha
+	 * @param menu
+	 *            : menu cha
 	 * @return danh sach menu con theo menu cha truyen vao
 	 */
 	public List<Object> createDynamicMenu(Menu menu) {

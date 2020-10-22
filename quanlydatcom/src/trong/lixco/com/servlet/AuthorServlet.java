@@ -15,6 +15,7 @@ import trong.lixco.com.account.servicepublics.Account;
 import trong.lixco.com.account.servicepublics.AccountServicePublic;
 import trong.lixco.com.account.servicepublics.AccountServicePublicProxy;
 import trong.lixco.com.account.servicepublics.SingleSignOn;
+import trong.lixco.com.bean.staticentity.DetectDevice;
 import trong.lixco.com.danhgianangluc.general.AuthorizationManager;
 import trong.lixco.com.ejb.service.AccountDatabaseService;
 import trong.lixco.com.jpa.entity.AccountDatabase;
@@ -40,6 +41,7 @@ public class AuthorServlet extends HttpServlet {
 			String database = request.getParameter("database");
 			if (idStr != null && database != null) {
 				session.setAttribute("database", database);
+				session.setAttribute("isMobile", false);
 				setPathLink(request);
 				AccountServicePublic accountServicePublic = new AccountServicePublicProxy();
 				String loginURL = path + "/account/pages/Start.jsf";
@@ -54,7 +56,12 @@ public class AuthorServlet extends HttpServlet {
 						boolean allow = authorizationManager.isAllowed(account);
 						session.setAttribute("account", account);
 						if (allow) {
-							response.sendRedirect(pathlocal + "/quanlydatcom/pages/home.htm");
+							if (request.getHeader("User-Agent").indexOf("Mobi") != -1) {
+								session.setAttribute("isMobile", true);
+								response.sendRedirect(pathlocal + "/quanlydatcom/pages/home.htm");
+							} else {
+								response.sendRedirect(pathlocal + "/quanlydatcom/pages/home.htm");
+							}
 						} else {
 							if (request.getHeader("User-Agent").indexOf("Mobi") != -1) {
 								response.sendRedirect(pathlocal + "/quanlydatcom/pages/dangkycommobile.htm");
@@ -73,7 +80,6 @@ public class AuthorServlet extends HttpServlet {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	public void setPathLink(HttpServletRequest request) {
