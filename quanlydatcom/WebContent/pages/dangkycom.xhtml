@@ -486,8 +486,8 @@
 							<f:convertDateTime type="date" pattern="dd-MM-yyyy" />
 						</h:outputText>
 					</center>
+					<p:growl id="growlDetail" showDetail="true" sticky="false" />
 					<h:form id="formDetail" style="margin-top:10px">
-						<p:growl id="growlDetail" showDetail="true" sticky="false" />
 						<p:dataTable var="item" value="#{dangKyComBean.ofsByDate}"
 							rowKey="#{item.id}" id="dtFoodShifts1" scrollHeight="370"
 							style="height:300px">
@@ -545,7 +545,7 @@
 								filterFunction="customFilter">
 								<p:ajax process="@this"
 									listener="#{dangKyComBean.ajaxHandleShowFoodByShifts()}"
-									update=":formChooseFood:dtFoodShifts1,:formChooseFood:kdgtc,:formDetail:growlDetail" />
+									update=":formChooseFood:dtFoodShifts1,:formChooseFood:kdgtc,growlDetail" />
 								<f:selectItems value="#{dangKyComBean.allShift}" var="loop"
 									itemLabel="#{loop.name}" itemValue="#{loop}" />
 								<p:column>
@@ -582,7 +582,7 @@
 								oncomplete="PF('wdvDialogChooseFood').hide();" process="@this"
 								value="Cập nhật" styleClass="btsave"
 								style="text-decoration: underline;width:20%"
-								update=":detail:dtOrderFood,:formDetail:growlDetail,:formDetail:dtFoodShifts1" />
+								update=":detail:dtOrderFood,growlDetail,:formDetail:dtFoodShifts1" />
 							<p:commandButton value="Đóng"
 								action="#{dangKyComBean.closeDialogChonMon()}"
 								style="width:20%;" styleClass="btnDelete" />
