@@ -282,11 +282,15 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 		try {
 			// kiem tra co phai nhan vien di ca hay khong
 			EmployeeDTO employee = EMPLOYEE_SERVICE_PUBLIC.findByCode(member.getCode());
-			if (!employee.isWorkShift() && shiftsSelected.getId() == ShiftsUtil.SHIFTS3_ID) {
-				PrimeFaces current = PrimeFaces.current();
-				current.executeScript("PF('wdvDialogChooseFood').hide();");
-				MessageView.ERROR("Không được đăng ký");
-				return;
+			// xac dinh di ca or khong di ca
+			if (!employee.isWorkShift()) {
+				if (shiftsSelected.getId() == ShiftsUtil.SHIFTS3_ID
+						|| shiftsSelected.getId() == ShiftsUtil.SHIFTS2_ID) {
+					PrimeFaces current = PrimeFaces.current();
+					current.executeScript("PF('wdvDialogChooseFood').hide();");
+					MessageView.ERROR("Không được đăng ký");
+					return;
+				}
 			}
 			java.sql.Date date = new java.sql.Date(orderfoodSelected.getRegistration_date().getTime());
 			List<OrderAndFoodByDate> orderAndFoods = ORDER_AND_FOOD_BY_DATE_SERVICE.find(date, shiftsSelected.getId(),
