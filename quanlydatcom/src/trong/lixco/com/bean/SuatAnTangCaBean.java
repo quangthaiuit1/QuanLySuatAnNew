@@ -1,5 +1,7 @@
 package trong.lixco.com.bean;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,10 +26,12 @@ import trong.lixco.com.bean.staticentity.Notification;
 import trong.lixco.com.ejb.service.FoodOverTimeService;
 import trong.lixco.com.ejb.service.OverTimeService;
 import trong.lixco.com.ejb.service.ShiftsService;
+import trong.lixco.com.ejb.service.TimeBoundService;
 import trong.lixco.com.jpa.entity.FoodOverTime;
 import trong.lixco.com.jpa.entity.OrderFood;
 import trong.lixco.com.jpa.entity.OverTime;
 import trong.lixco.com.jpa.entity.Shifts;
+import trong.lixco.com.jpa.entity.TimeBound;
 import trong.lixco.com.servicepublic.EmployeeDTO;
 import trong.lixco.com.servicepublic.EmployeeServicePublic;
 import trong.lixco.com.servicepublic.EmployeeServicePublicProxy;
@@ -60,6 +64,8 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 	private FoodOverTimeService FOOD_OVER_TIME_SERVICE;
 	@Inject
 	private OverTimeService OVER_TIME_SERVICE;
+	@Inject
+	private TimeBoundService TIME_BOUND_SERVICE;
 
 	@Override
 	protected void initItem() {
@@ -146,8 +152,24 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 	}
 
 	public void saveOrUpdate() {
+		// chua duyet
+		boolean isCurrent = false;
+		// query gio duoi DB
+		TimeBound timeDKTC = TIME_BOUND_SERVICE.find("DKTC");
+		// int minutes = Integer.parseInt(timeDKTC.getMinutes());
+		String timeDKSAString = timeDKTC.getHour() + ":" + timeDKTC.getMinutes();
+		try {
+			isCurrent = isCurrentDate(dateSearch, timeDKSAString);
+		} catch (Exception e) {
+		}
+		if (isCurrent) {
+			// Notification.NOTI_WARN("Vui lòng đăng ký trước 15h ngày hôm
+			// trước");
+			MessageView.WARN("Vui lòng đăng ký trước " + timeDKSAString);
+			return;
+		}
+		// end check
 		// handle xoa toan bo list cu -> add lai list moi
-
 		List<OverTime> foodOT = OVER_TIME_SERVICE.find(dateSearch, shiftsSelected.getId(), departmentSearch.getCode());
 		if (foodOT.size() != 0) {
 			// neu da duyet roi thi khong duoc update
@@ -161,7 +183,7 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 				return;
 			}
 		}
-		// chua duyet
+
 		OverTime entityNew = null;
 		List<EmployeeThai> listEmployeeSelected = new ArrayList<>();
 
@@ -202,6 +224,26 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 			}
 		}
 		MessageView.INFO("Thành công");
+	}
+
+	// ktra co phai ngay hien tai hay khong
+	public boolean isCurrentDate(Date dateCheck, String hhmm) throws ParseException {
+		Date dateCurrent = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		// neu la ngay hien tai
+		if (sdf.format(dateCurrent).equals(sdf.format(dateCheck))) {
+			return trong.lixco.com.bean.staticentity.DateUtil.compareHHMM(dateCurrent, hhmm);
+		}
+		// // 3h ngay hom truoc
+		// Date dateTomorrow = DateUtil.addDays(dateCurrent, 1);
+		// // neu ngay check == ngay mai va 3h ngay hien tai
+		// if (sdf.format(dateTomorrow).equals(sdf.format(dateCheck))) {
+		// // kiem tra gio hien tai voi gio khoa dang ky mon an
+		// return
+		// trong.lixco.com.bean.staticentity.DateUtil.compareHHMM(dateCurrent,
+		// hhmm);
+		// }
+		return false;
 	}
 
 	@Override

@@ -925,6 +925,17 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 				// long endTimeAll = System.currentTimeMillis() - startTimeAll;
 				// System.out.println("Thoi gian toan bo chuong trinh: " +
 				// endTimeAll);
+
+				// handle neu khong co ai dang ky
+				if (baoChenhLechs.isEmpty()) {
+					BaoChenhLech first = new BaoChenhLech();
+					first.setNgay(DateUtil.DATE_WITHOUT_TIME(dateSearchExactly));
+					first.setTenmonan(ShiftsUtil.TEN_MON_TU_CHON);
+					first.setSoluongchinhxac(0);
+					first.setIdmonan(ShiftsUtil.ID_MON_TU_CHON);
+					baoChenhLechs.add(first);
+				}
+
 				if (!baoChenhLechs.isEmpty()) {
 					// report
 					String reportPath = FacesContext.getCurrentInstance().getExternalContext()

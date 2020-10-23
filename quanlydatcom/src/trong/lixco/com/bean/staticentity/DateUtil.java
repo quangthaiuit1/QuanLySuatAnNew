@@ -13,15 +13,22 @@ public class DateUtil {
 		return cal.getTime();
 	}
 
-	public static boolean compareHHMM(Date date, String hhmm) {
-		Date dateCurrent = new Date();
+	public static boolean compareHHMM(Date date, String hhmm) throws ParseException {
+		// Date dateCurrent = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-		String getCurrentTime = sdf.format(dateCurrent.getTime());
-		String getTestTime = hhmm;
-		if (getCurrentTime.compareTo(getTestTime) > 0) {
-			return true;
-		}
-		if (getCurrentTime.compareTo(getTestTime) < 0) {
+		String getCurrentTime = sdf.format(date.getTime());
+		Date currentTime = sdf.parse(getCurrentTime);
+		String getTimeBound = hhmm;
+		Date timeBound = sdf.parse(getTimeBound);
+		// if (getCurrentTime.compareTo(getTimeBound) > 0) {
+		// return true;
+		// }
+		// if (getCurrentTime.compareTo(getTimeBound) < 0) {
+		// return false;
+		// } else {
+		// return true;
+		// }
+		if (currentTime.before(timeBound)) {
 			return false;
 		} else {
 			return true;

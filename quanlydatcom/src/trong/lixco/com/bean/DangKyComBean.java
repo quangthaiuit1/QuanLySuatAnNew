@@ -38,10 +38,12 @@ import trong.lixco.com.ejb.service.FoodDayByDayService;
 import trong.lixco.com.ejb.service.OrderAndFoodByDateService;
 import trong.lixco.com.ejb.service.OrderFoodService;
 import trong.lixco.com.ejb.service.ShiftsService;
+import trong.lixco.com.ejb.service.TimeBoundService;
 import trong.lixco.com.jpa.entity.FoodByDay;
 import trong.lixco.com.jpa.entity.OrderAndFoodByDate;
 import trong.lixco.com.jpa.entity.OrderFood;
 import trong.lixco.com.jpa.entity.Shifts;
+import trong.lixco.com.jpa.entity.TimeBound;
 import trong.lixco.com.servicepublic.EmployeeDTO;
 import trong.lixco.com.servicepublic.EmployeeServicePublic;
 import trong.lixco.com.servicepublic.EmployeeServicePublicProxy;
@@ -113,6 +115,9 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 
 	@EJB
 	private ShiftsService SHIFTS_SERVICE;
+
+	@EJB
+	private TimeBoundService TIME_BOUND_SERVICE;
 
 	EmployeeServicePublic EMPLOYEE_SERVICE_PUBLIC;
 
@@ -215,6 +220,10 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 		// list order food tu DB
 		java.sql.Date start = new java.sql.Date(startDate.getTime());
 		java.sql.Date end = new java.sql.Date(endDate.getTime());
+		// query gio duoi DB
+		TimeBound timeDKSA = TIME_BOUND_SERVICE.find("DKSA");
+		int minutes = Integer.parseInt(timeDKSA.getMinutes());
+		String timeDKSAString = timeDKSA.getHour() + ":" + minutes;
 
 		boolean isExpired = isExpired(itemSelected.getFood_by_day());
 		if (isExpired) {
@@ -223,13 +232,13 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 			return;
 		}
 		try {
-			isCurrent = isDateCurrent(itemSelected.getFood_by_day().getFood_date());
+			isCurrent = isDateCurrent(itemSelected.getFood_by_day().getFood_date(), timeDKSAString);
 		} catch (Exception e) {
 		}
 		if (isCurrent) {
 			// Notification.NOTI_WARN("Vui lòng đăng ký trước 15h ngày hôm
 			// trước");
-			MessageView.ERROR("Không được xóa sau 14:30 ngày hôm trước");
+			MessageView.ERROR("Không được xóa sau " + timeDKSAString + " ngày hôm trước");
 			return;
 		}
 		// kiem tra xem item duoc xoa -> ngay co nho hon hoac bang ngay hien tai
@@ -398,7 +407,7 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 	}
 
 	// ktra co phai ngay hien tai hay khong
-	public boolean isDateCurrent(Date dateCheck) throws ParseException {
+	public boolean isDateCurrent(Date dateCheck, String hhmm) throws ParseException {
 		Date dateCurrent = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		// neu la ngay hien tai
@@ -409,8 +418,8 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 		Date dateTomorrow = DateUtil.add(dateCurrent, 1);
 		// neu ngay check == ngay mai va 3h ngay hien tai
 		if (sdf.format(dateTomorrow).equals(sdf.format(dateCheck))) {
-			// kiem tra gio hien tai so voi 15h
-			return trong.lixco.com.bean.staticentity.DateUtil.compareHHMM(dateCurrent, "14:30");
+			// kiem tra gio hien tai voi gio khoa dang ky mon an
+			return trong.lixco.com.bean.staticentity.DateUtil.compareHHMM(dateCurrent, hhmm);
 		}
 		return false;
 	}
@@ -437,14 +446,18 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 			// list order food tu DB
 			java.sql.Date start = new java.sql.Date(startDate.getTime());
 			java.sql.Date end = new java.sql.Date(endDate.getTime());
+			// query gio duoi DB
+			TimeBound timeDKSA = TIME_BOUND_SERVICE.find("DKSA");
+			int minutes = Integer.parseInt(timeDKSA.getMinutes());
+			String timeDKSAString = timeDKSA.getHour() + ":" + minutes;
 			try {
-				isCurrent = isDateCurrent(food1Selected.getFood_date());
+				isCurrent = isDateCurrent(food1Selected.getFood_date(), timeDKSAString);
 			} catch (Exception e) {
 			}
 			if (isCurrent) {
 				// Notification.NOTI_WARN("Vui lòng đăng ký trước 15h ngày hôm
 				// trước");
-				MessageView.WARN("Vui lòng đăng ký trước 14:30 ngày hôm trước");
+				MessageView.WARN("Vui lòng đăng ký trước " + timeDKSAString + " ngày hôm trước");
 				return;
 			}
 			if (!isCurrent) {
