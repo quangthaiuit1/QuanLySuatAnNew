@@ -222,8 +222,8 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 		java.sql.Date end = new java.sql.Date(endDate.getTime());
 		// query gio duoi DB
 		TimeBound timeDKSA = TIME_BOUND_SERVICE.find("DKSA");
-		int minutes = Integer.parseInt(timeDKSA.getMinutes());
-		String timeDKSAString = timeDKSA.getHour() + ":" + minutes;
+//		int minutes = Integer.parseInt(timeDKSA.getMinutes());
+		String timeDKSAString = timeDKSA.getHour() + ":" + timeDKSA.getMinutes();
 
 		boolean isExpired = isExpired(itemSelected.getFood_by_day());
 		if (isExpired) {
@@ -448,8 +448,8 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 			java.sql.Date end = new java.sql.Date(endDate.getTime());
 			// query gio duoi DB
 			TimeBound timeDKSA = TIME_BOUND_SERVICE.find("DKSA");
-			int minutes = Integer.parseInt(timeDKSA.getMinutes());
-			String timeDKSAString = timeDKSA.getHour() + ":" + minutes;
+			// int minutes = Integer.parseInt(timeDKSA.getMinutes());
+			String timeDKSAString = timeDKSA.getHour() + ":" + timeDKSA.getMinutes();
 			try {
 				isCurrent = isDateCurrent(food1Selected.getFood_date(), timeDKSAString);
 			} catch (Exception e) {

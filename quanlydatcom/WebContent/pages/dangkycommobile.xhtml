@@ -86,22 +86,6 @@
 	border-radius: 0px;
 }
 
-.thai {
-	max-width: 400px;
-	max-height: 400px;
-	overflow: hidden;
-	margin: 0 auto;
-}
-
-.thai img {
-	transition: 0.5s all ease-in-out;
-}
-
-.thai:hover img {
-	height: 400px !important;
-	transform: scale(2.0);
-}
-
 .ui-widget .ui-widget {
 	font-size: 60px;
 }
@@ -273,9 +257,14 @@ div#idDialogChooseFood {
 		    }
 		    return false;
 		}
-		
-		
  	});
+	PrimeFaces.widget.DataTable.prototype.onRowClick0 = PrimeFaces.widget.DataTable.prototype.onRowClick;
+    PrimeFaces.widget.DataTable.prototype.onRowClick= function(event, rowElement, silent) {    
+        if($(event.target).is('img')) {
+        	event.target = $(event.target).closest('td');
+        }
+        this.onRowClick0(event, rowElement, silent);
+    };
 	//]]>
 	</script>
 </h:head>
@@ -471,8 +460,7 @@ div#idDialogChooseFood {
 									<h:outputText value="#{item.food_by_day.category_food.name}" />
 									<br></br> <img
 										src="data:image/jpg;base64, #{item.food_by_day.category_food.imageString()}"
-										style="max-width: 250px; max-height: 250px; object-fit: contain;" />
-									<br></br>
+										style="height: 350px; object-fit: contain;" /> <br></br>
 									<p:commandLink value="Xóa"
 										action="#{dangKyComBean.deleteOrderFood(item)}"
 										update=":formDetail:dtFoodShifts1,growlDetail,:detail:dtOrderFood"
@@ -523,14 +511,14 @@ div#idDialogChooseFood {
 							rowKey="#{item.id}" id="dtFoodShifts1" scrollHeight="370"
 							style="height:1270px;margin-top:20px;width:100%">
 							<p:ajax event="rowSelect" process="@this"></p:ajax>
-							<p:column headerText="Tên món ăn" width="15px"
+							<p:column headerText="Thông tin món ăn" width="15px"
 								style="text-align:center">
+								<img
+									src="data:image/jpg;base64, #{item.category_food.imageString()}"
+									style="height: 350px; background-repeat: no-repeat; background-position: center;" />
+								<br></br>
 								<h:outputText value="#{item.category_food.name}" />
-								<div class="thai" style="height:350px">
-									<img
-										src="data:image/jpg;base64, #{item.category_food.imageString()}"
-										style="height: 350px; object-fit: contain;" />
-								</div>
+
 							</p:column>
 						</p:dataTable>
 					</h:form>
