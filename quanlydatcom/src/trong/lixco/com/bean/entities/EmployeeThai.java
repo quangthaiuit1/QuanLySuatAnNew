@@ -5,7 +5,16 @@ public class EmployeeThai {
 	private String employeeName;
 	private String departmentCode;
 	private String departmentName;
+	private String employeeCodeOld;
 	private boolean isSelect = false;
+
+	public String getEmployeeCodeOld() {
+		return employeeCodeOld;
+	}
+
+	public void setEmployeeCodeOld(String employeeCodeOld) {
+		this.employeeCodeOld = employeeCodeOld;
+	}
 
 	public String getEmployeeCode() {
 		return employeeCode;

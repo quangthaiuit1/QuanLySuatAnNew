@@ -133,6 +133,9 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 					employeeTemp.setEmployeeName(employeesArray[i].getName());
 					employeeTemp.setDepartmentCode(employeesArray[i].getCodeDepart());
 					employeeTemp.setDepartmentName(employeesArray[i].getNameDepart());
+					if (employeesArray[i].getCodeOld() != null) {
+						employeeTemp.setEmployeeCodeOld(employeesArray[i].getCodeOld());
+					}
 					employeesThai.add(employeeTemp);
 				}
 				if (employeesThai.size() != 0) {
@@ -210,6 +213,9 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 					foodOTTemp.setEmployee_code(e.getEmployeeCode());
 					foodOTTemp.setEmployee_name(e.getEmployeeName());
 					foodOTTemp.setOver_time(entityNew);
+					if (e.getEmployeeCodeOld() != null) {
+						foodOTTemp.setEmployee_code_old(e.getEmployeeCodeOld());
+					}
 					FoodOverTime checkCreate = FOOD_OVER_TIME_SERVICE.create(foodOTTemp);
 					if (checkCreate == null) {
 						Notification.NOTI_ERROR("Lỗi");

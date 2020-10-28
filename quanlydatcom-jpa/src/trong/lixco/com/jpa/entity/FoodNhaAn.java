@@ -16,11 +16,20 @@ public class FoodNhaAn extends AbstractEntity {
 	private String department_name;
 	private Date food_date;
 	private boolean is_not_reg_food = false;
+	private boolean is_over_time = false;
 
 	@OneToOne
 	private Shifts shifts;
 	@OneToOne
 	private CategoryFood category_food;
+
+	public boolean isIs_over_time() {
+		return is_over_time;
+	}
+
+	public void setIs_over_time(boolean is_over_time) {
+		this.is_over_time = is_over_time;
+	}
 
 	public boolean isIs_not_reg_food() {
 		return is_not_reg_food;

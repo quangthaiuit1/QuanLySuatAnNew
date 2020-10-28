@@ -460,7 +460,11 @@ div#idDialogChooseFood {
 									<h:outputText value="#{item.food_by_day.category_food.name}" />
 									<br></br> <img
 										src="data:image/jpg;base64, #{item.food_by_day.category_food.imageString()}"
-										style="height: 350px; object-fit: contain;" /> <br></br>
+										style="min-height: 150px; max-height: 350px; object-fit: contain; -ms-transform: rotate(90deg); transform: rotate(90deg);" />
+									<p:graphicImage name="gfx/image-notimage-650x450.png"
+										style="min-height:200px;max-height:210px; object-fit: contain;"
+										rendered="#{item.food_by_day.category_food.image == null}" />
+									<br></br>
 									<p:commandLink value="Xóa"
 										action="#{dangKyComBean.deleteOrderFood(item)}"
 										update=":formDetail:dtFoodShifts1,growlDetail,:detail:dtOrderFood"
@@ -515,9 +519,13 @@ div#idDialogChooseFood {
 								style="text-align:center">
 								<img
 									src="data:image/jpg;base64, #{item.category_food.imageString()}"
-									style="height: 350px; background-repeat: no-repeat; background-position: center;" />
+									style="min-height: 250px; max-height: 350px; background-repeat: no-repeat; background-position: center; -ms-transform: rotate(90deg); transform: rotate(90deg);" />
+								<p:graphicImage name="gfx/image-notimage-650x450.png"
+									style="min-height:200px;max-height:210px; object-fit: contain;"
+									rendered="#{item.category_food.image == null}" />
 								<br></br>
-								<h:outputText value="#{item.category_food.name}" />
+								<h:outputText value="#{item.category_food.name}"
+									style="margin-top:5px;margin-bottom:5px" />
 
 							</p:column>
 						</p:dataTable>

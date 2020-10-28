@@ -1108,7 +1108,10 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 		cell = row.createCell(5);
 		cell.setCellValue("Tên món");
 		cell.setCellStyle(style);
-		// xep loai
+		// tang ca
+		cell = row.createCell(6);
+		cell.setCellValue("Tăng ca");
+		cell.setCellStyle(style);
 
 		// Data
 		if (!foods.isEmpty()) {
@@ -1144,6 +1147,15 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 				// ten mon an
 				cell = row.createCell(5);
 				cell.setCellValue(f.getCategory_food().getName());
+
+				// tang ca
+				cell = row.createCell(6);
+				if (f.isIs_over_time()) {
+					cell.setCellValue("Tăng ca");
+				}
+				if (!f.isIs_over_time()) {
+					cell.setCellValue("Không");
+				}
 			}
 		}
 

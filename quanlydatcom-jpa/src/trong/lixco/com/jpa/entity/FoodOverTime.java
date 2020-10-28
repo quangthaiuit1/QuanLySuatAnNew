@@ -9,9 +9,18 @@ import javax.persistence.Table;
 public class FoodOverTime extends AbstractEntity {
 	private String employee_code;
 	private String employee_name;
+	private String employee_code_old;
 
 	@OneToOne
 	private OverTime over_time;
+
+	public String getEmployee_code_old() {
+		return employee_code_old;
+	}
+
+	public void setEmployee_code_old(String employee_code_old) {
+		this.employee_code_old = employee_code_old;
+	}
 
 	public String getEmployee_code() {
 		return employee_code;

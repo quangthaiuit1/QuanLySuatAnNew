@@ -502,11 +502,20 @@
 								</center>
 							</p:column>
 							<p:column headerText="Hình ảnh">
+								<p:panelGrid id="imageThai" columns="1"
+									rendered="#{item.food_by_day.category_food.image != null}">
+									<center>
+										<img
+											src="data:image/jpg;base64, #{item.food_by_day.category_food.imageString()}"
+											style="max-width: 90px; max-height: 90px; object-fit: contain; -ms-transform: rotate(90deg); transform: rotate(90deg);" />
+									</center>
+								</p:panelGrid>
 								<center>
-									<img
-										src="data:image/jpg;base64, #{item.food_by_day.category_food.imageString()}"
-										style="max-width: 90px; max-height: 90px; object-fit: contain;" />
+									<p:graphicImage name="gfx/image-notimage-650x450.png"
+										style="max-width: 90px; max-height: 90px; object-fit: contain;"
+										rendered="#{item.food_by_day.category_food.image == null}" />
 								</center>
+
 							</p:column>
 							<p:column headerText="">
 								<center>
@@ -566,11 +575,16 @@
 							<p:column headerText="Hình ảnh" width="15px"
 								style="text-align:center">
 								<div class="thai">
-									<img
-										src="data:image/jpg;base64, #{item.category_food.imageString()}"
-										style="width: 100px; height: 100px; object-fit: contain;" />
+									<p:panelGrid columns="1"
+										rendered="#{item.category_food.image != null}">
+										<img
+											src="data:image/jpg;base64, #{item.category_food.imageString()}"
+											style="width: 100px; height: 100px; object-fit: contain;" />
+									</p:panelGrid>
 								</div>
-
+								<p:graphicImage name="gfx/image-notimage-650x450.png"
+									style="max-width: 90px; max-height: 90px; object-fit: contain;"
+									rendered="#{item.category_food.image == null}" />
 							</p:column>
 
 						</p:dataTable>
