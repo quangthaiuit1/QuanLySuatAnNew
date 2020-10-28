@@ -432,7 +432,8 @@
 									<p:commandButton styleClass="btsearch"
 										style="margin-top:20px;float:right" type="submit"
 										value="Tìm kiếm" process="@form"
-										action="#{dangKyComBean.findData()}" update="dtOrderFood"
+										action="#{dangKyComBean.findData()}"
+										update="dtOrderFood,detail:growlXoaMonAn"
 										icon="ui-icon-search" />
 									<p:commandButton style="float:left;margin-top:20px"
 										styleClass="btsave" type="submit" value="Chi tiết (PDF)"

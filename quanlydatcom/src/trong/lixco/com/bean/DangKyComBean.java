@@ -131,9 +131,16 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 	private Shifts shiftsSelected;
 
 	public void ajax_setDate() {
-		LocalDate lc = new LocalDate();
-		startDate = lc.withWeekOfWeekyear(week).withYear(yearOfWeek).dayOfWeek().withMinimumValue().toDate();
-		endDate = lc.withWeekOfWeekyear(week).withYear(yearOfWeek).dayOfWeek().withMaximumValue().toDate();
+		try {
+			if (week <= 53 && week > 0) {
+				LocalDate lc = new LocalDate();
+				startDate = lc.withWeekOfWeekyear(week).withYear(yearOfWeek).dayOfWeek().withMinimumValue().toDate();
+				endDate = lc.withWeekOfWeekyear(week).withYear(yearOfWeek).dayOfWeek().withMaximumValue().toDate();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override
@@ -222,7 +229,7 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 		java.sql.Date end = new java.sql.Date(endDate.getTime());
 		// query gio duoi DB
 		TimeBound timeDKSA = TIME_BOUND_SERVICE.find("DKSA");
-//		int minutes = Integer.parseInt(timeDKSA.getMinutes());
+		// int minutes = Integer.parseInt(timeDKSA.getMinutes());
 		String timeDKSAString = timeDKSA.getHour() + ":" + timeDKSA.getMinutes();
 
 		boolean isExpired = isExpired(itemSelected.getFood_by_day());
@@ -339,8 +346,8 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 
 	public void findData() {
 		try {
-			if (startDate == null || endDate == null) {
-				Notification.NOTI_ERROR("Vui lòng chọn ngày");
+			if (startDate == null || endDate == null || endDate.before(startDate)) {
+				MessageView.ERROR("Vui lòng chọn ngày!");
 				return;
 			}
 			// list order food tu DB

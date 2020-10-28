@@ -391,7 +391,8 @@ div#idDialogChooseFood {
 									<p:commandButton styleClass="btsearch"
 										style="width:80%;height:100px; margin: 0 auto" type="submit"
 										value="Tìm kiếm" process="@form"
-										action="#{dangKyComBean.findData()}" update="dtOrderFood" />
+										action="#{dangKyComBean.findData()}"
+										update="dtOrderFood,detail:growlXoaMonAn" />
 								</div>
 								<div class="ui-g">
 									<p:commandButton
