@@ -5,6 +5,8 @@ public class DataResponseAPI {
 	String msg = "";
 	String dt = "";
 
+	
+
 	public int getErr() {
 		return err;
 	}

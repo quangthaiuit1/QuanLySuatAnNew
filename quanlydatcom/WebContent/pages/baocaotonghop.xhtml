@@ -72,6 +72,12 @@
 		    PF('pbClient').setValue(0);
 		    PF('startButton1').enable();
 		}
+		 function showProgress() {
+	         PF('progressLoader').show();
+	       }
+	       function closeLoader() {
+	         PF('progressLoader').hide();
+	       }
     //]]>
 	</script>
 
@@ -100,6 +106,8 @@
 						<f:selectItem
 							itemLabel="Danh sách NV không ăn cơm (có đăng ký)"
 							itemValue="8" />
+						<f:selectItem itemLabel="Danh sách NV không đăng ký cơm"
+							itemValue="9" />
 						<p:ajax listener="#{baoCaoBean.handleRenderView()}"
 							process="@this" />
 					</p:selectOneMenu>
@@ -565,8 +573,42 @@
 						</div>
 					</div>
 				</div>
-				<!-- End DANH SACH NV DK COM NHUNG KHONG AN -->
 			</p:fieldset>
+			<!-- End DANH SACH NV DK COM NHUNG KHONG AN -->
+			<!-- DANH SACH NHAN VIEN KHONG DANG KY COM -->
+			<p:fieldset rendered="#{baoCaoBean.checkedRenderView[8]}">
+				<div class="ui-g">
+					<h3>Danh sách nhân viên không đăng ký cơm</h3>
+				</div>
+				<div class="ui-g">
+					<p:separator style="width:100%;float:left" />
+				</div>
+				<div class="ui-g-6"
+					style="margin: 0 auto; width: 60%; float: none !important">
+					<div class="ui-g-6">
+						<p:fieldset legend="Chọn ngày:" styleClass="noneformatfs"
+							style=" height:60px">
+							<p:calendar styleClass="stwidth" locale="vi"
+								value="#{baoCaoBean.dateSearch}" id="dateSearchKDKi"
+								pattern="#{applicationBean.cf.formatDate}"
+								showButtonPanel="true" navigator="true"
+								mask="#{applicationBean.cf.maskDate}" />
+						</p:fieldset>
+					</div>
+					<div class="ui-g-6">
+						<p:fieldset
+							style=" width:80%;margin-left:4%;height:50px;margin-top:10px"
+							styleClass="noneformatfs">
+							<p:commandButton value="Xuất excel" styleClass="btsave"
+								style="float:right;margin-top:10px" ajax="false"
+								onclick="monitorExporting(showProgress, closeLoader);"
+								id="btnExcelKDKi"
+								actionListener="#{baoCaoBean.baoCaoNVKhongDangKyExcel()}" />
+						</p:fieldset>
+					</div>
+				</div>
+			</p:fieldset>
+			<!-- END  -->
 		</h:form>
 		<!-- DIALOG HANDLE SHOW CHI TIET -->
 		<p:dialog widgetVar="wdvDialogFoodCustomer" width="800" height="400"
@@ -647,6 +689,10 @@
 					</p:column>
 				</p:dataTable>
 			</h:form>
+		</p:dialog>
+		<p:dialog widgetVar="progressLoader" id="divProgress" modal="true"
+			draggable="false" resizable="false" showHeader="false">
+			<p:graphicImage library="gfx" name="icon-loading.gif" />
 		</p:dialog>
 	</ui:define>
 </ui:composition>

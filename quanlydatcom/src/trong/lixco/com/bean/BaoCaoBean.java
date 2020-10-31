@@ -42,6 +42,10 @@ import trong.lixco.com.account.servicepublics.DepartmentServicePublicProxy;
 import trong.lixco.com.account.servicepublics.Member;
 import trong.lixco.com.bean.entities.BaoChenhLech;
 import trong.lixco.com.bean.entities.ChiTietDuBaoSuatAn;
+import trong.lixco.com.bean.entities.DepartmentData;
+import trong.lixco.com.bean.entities.DepartmentDataService;
+import trong.lixco.com.bean.entities.EmployeeData;
+import trong.lixco.com.bean.entities.EmployeeDataService;
 import trong.lixco.com.bean.entities.OrderFoodReport;
 import trong.lixco.com.bean.entities.TimekeepingData;
 import trong.lixco.com.bean.entities.TimekeepingDataService;
@@ -162,7 +166,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 		toDateAte = currentDate00;
 
 		dateSearchExactly = currentDate00;
-		checkedRenderView = new boolean[10];
+		checkedRenderView = new boolean[11];
 		for (int i = 0; i < checkedRenderView.length; i++) {
 			checkedRenderView[i] = false;
 		}
@@ -177,7 +181,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 		}
 		if (valueChecked != 0) {
 			// thay i < tai day
-			for (int i = 1; i < 9; i++) {
+			for (int i = 1; i < 10; i++) {
 				if (valueChecked == i) {
 					checkedRenderView[i - 1] = true;
 				} else {
@@ -333,9 +337,147 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 		}
 	}
 
+	// bao cao danh sach nhan vien khong dang ky mon an
+	public void baoCaoNVKhongDangKyExcel() {
+		try {
+			String nameSheet = "";
+			Date dateSearchWithoutTime = DateUtil.DATE_WITHOUT_TIME(dateSearch);
+			nameSheet = "DS NV Ngay " + formatter.format(dateSearch);
+			List<EmployeeData> employeeNotReg = new ArrayList<>();
+			// kiem tra nhan vien co dang ky com chua
+			List<EmployeeData> totalEmp = totalEmployeeHCM();
+			for (int i = 0; i < totalEmp.size(); i++) {
+				boolean isRegister = false;
+				OrderFood ofCheck = ORDER_FOOD_SERVICE.findByDateAndEmployeeCode(dateSearchWithoutTime,
+						totalEmp.get(i).getCode());
+				if (ofCheck.getId() != null) {
+					List<OrderAndFoodByDate> ofbdsByEmpl = ORDER_AND_FOOD_BY_DATE_SERVICE
+							.findByShiftsId(ofCheck.getId(), 0);
+					// chua dang ky suat an nao
+					if (!ofbdsByEmpl.isEmpty()) {
+						isRegister = true;
+					}
+				}
+				if (!isRegister) {
+					employeeNotReg.add(totalEmp.get(i));
+				}
+			}
+
+			XSSFWorkbook workbook = new XSSFWorkbook();
+			XSSFSheet sheet = null;
+			sheet = workbook.createSheet(nameSheet);
+
+			int rownum = 0;
+			Cell cell;
+			Row row;
+			XSSFCellStyle style = createStyleForTitle(workbook);
+			style.setAlignment(CellStyle.ALIGN_CENTER);
+
+			// cell style for date
+			XSSFCellStyle cellStyleDate = workbook.createCellStyle();
+			CreationHelper createHelper = workbook.getCreationHelper();
+			cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+
+			row = sheet.createRow(rownum);
+
+			// EmpNo
+			cell = row.createCell(0);
+			cell.setCellValue("Mã NV");
+			// xep loai// EmpName
+			cell = row.createCell(1);
+			cell.setCellValue("Tên NV");
+			cell.setCellStyle(style);
+			// Salary
+			cell = row.createCell(2);
+			cell.setCellValue("Phòng ban");
+			cell.setCellStyle(style);
+
+			cell = row.createCell(3);
+			cell.setCellValue("Ngày");
+			cell.setCellStyle(style);
+
+			// Data
+			if (!employeeNotReg.isEmpty()) {
+				for (EmployeeData f : employeeNotReg) {
+					// Gson gson = new Gson();
+					rownum++;
+					row = sheet.createRow(rownum);
+
+					// ma nhan vien
+					cell = row.createCell(0);
+					cell.setCellValue(f.getCode());
+					// ten nhan vien
+					cell = row.createCell(1);
+					cell.setCellValue(f.getName());
+
+					// ten phong ban
+					cell = row.createCell(2);
+					cell.setCellValue(f.getNameDepart());
+					// ngay
+					cell = row.createCell(3);
+					cell.setCellValue(dateSearchWithoutTime);
+					cell.setCellStyle(cellStyleDate);
+				}
+			}
+
+			String filename = "DSKhongDK.xlsx";
+			FacesContext facesContext = FacesContext.getCurrentInstance();
+			ExternalContext externalContext = facesContext.getExternalContext();
+			externalContext.setResponseContentType("application/vnd.ms-excel");
+			externalContext.setResponseHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+			workbook.write(externalContext.getResponseOutputStream());
+			// cancel progress
+			facesContext.responseComplete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// tim danh sach toan bo nhan vien o HCM
+	public List<EmployeeData> totalEmployeeHCM() {
+		// Danh sach nhan vien o HCM khong bao gom phong kinh doanh
+		// tao list phong ban loai bo
+		String[] departmentCodeArraySub = new String[] { "40019", "40001", "40007", "40008", "40009", "40010", "40011",
+				"40012", "40056", "40013", "30010", "40014", "40015", "40016", "40047", "40048", "40017", "40018",
+				"40020", "40021", "40022" };
+		List<String> departmentCodeArraySubArr = Arrays.asList(departmentCodeArraySub);
+		DepartmentData[] departmentHCMArray = DepartmentDataService.timtheophongquanly("20002");
+		List<DepartmentData> departmentHCM = new ArrayList<>(Arrays.asList(departmentHCMArray));
+		// tao string danh sach ma phong ban
+		StringBuilder departmentCodeString = new StringBuilder();
+		for (int i = 0; i < departmentHCM.size(); i++) {
+			boolean isSub = false;
+			for (int j = 0; j < departmentCodeArraySubArr.size(); j++) {
+				if (departmentHCM.get(i).getCode().equals(departmentCodeArraySubArr.get(j))) {
+					isSub = true;
+					break;
+				}
+			}
+			if (!isSub) {
+				departmentCodeString.append(departmentHCM.get(i).getCode());
+				departmentCodeString.append(",");
+			}
+		}
+		String departmentCodeStringNew = departmentCodeString.toString();
+		if (departmentCodeStringNew.endsWith(",")) {
+			departmentCodeStringNew = departmentCodeStringNew.substring(0, departmentCodeStringNew.length() - 1);
+		}
+		EmployeeData[] employees = EmployeeDataService.timtheodsphongban(departmentCodeStringNew);
+		List<EmployeeData> employeesAfterFilterKhongAn = new ArrayList<>();
+		// loc ra nhung nguoi khong an com truong
+		for (EmployeeData e : employees) {
+			// 0006768 la account nha an -> loc ra luon
+			if (!e.isQuitEating() && !e.getCode().equals("0006768")) {
+				employeesAfterFilterKhongAn.add(e);
+			}
+		}
+		return employeesAfterFilterKhongAn;
+
+	}
+	// end bao cao danh sach nhan vien khong dang ky mon an
+
 	// tong hop toan bo can bo CNV cong ty
 	public void baoCaoNVKhongAnExcel() throws IOException {
-		PrimeFaces.current().executeScript("PF('pbClient').start();");
 		String nameSheet = "";
 		Date dateSearchWithoutTime = DateUtil.DATE_WITHOUT_TIME(fromDateAte);
 		if (shiftsSelected.getId() == ShiftsUtil.SHIFTS1_ID) {
