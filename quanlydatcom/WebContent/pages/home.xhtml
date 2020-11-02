@@ -11,6 +11,23 @@
 	<h:outputStylesheet name="css/style.css" />
 	<h:outputScript src="js/jquery-1.8.2.min.js" />
 	<h:outputStylesheet name="css/animation.css" />
+	<style>
+#primefacesmessagedlg {
+	z-index: 2019 !important;
+}
+
+.progressPanel {
+	padding: 0px;
+}
+
+.progressPanel .ui-panel-content {
+	padding: 0px;
+}
+
+.progressPanel .ui-progressbar.ui-widget-content {
+	margin-bottom: 0px;
+}
+</style>
 	<script>
 	//<![CDATA[
 	PrimeFaces.locales['vi'] = {     closeText: 'Tắt', prevText: 'Tháng trước', nextText: 'Tháng sau', monthNames: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'], monthNamesShort: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12' ], dayNames: ['Chúa Nhựt', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'], dayNamesShort: ['CN', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'], dayNamesMin: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'], weekHeader: 'Tuần', firstDay: 1, isRTL: false, showMonthAfterYear: false, yearSuffix:'', timeOnlyTitle: 'Chọn giờ', timeText: 'Giờ', hourText: 'Giờ', minuteText: 'Phút', secondText: 'Giây', currentText: 'Giờ hiện hành', ampm: false, month: 'Tháng', week: 'Tuần', day: 'Ngày', allDayText: 'Cả ngày' };
@@ -118,27 +135,16 @@
 
 	<p:ajaxStatus
 		style="display:block;margin-top: 10%;z-index: 500; margin-left: 47%; position: absolute;"
-		onstart="PF('progressPanel').show();"
-		oncomplete="cleanupTooltips();PF('progressPanel').close();"
 		id="ajaxStatusPanel">
+		<f:facet name="start">
+			<p:graphicImage name="/gfx/icon-loading.gif"
+				style="width: 60px;height: 60px;" />
+		</f:facet>
+		<f:facet name="complete">
+			<h:outputText value="" />
+		</f:facet>
 	</p:ajaxStatus>
-	<style>
-#primefacesmessagedlg {
-	z-index: 2019 !important;
-}
 
-.progressPanel {
-	padding: 0px;
-}
-
-.progressPanel .ui-panel-content {
-	padding: 0px;
-}
-
-.progressPanel .ui-progressbar.ui-widget-content {
-	margin-bottom: 0px;
-}
-</style>
 	<h:form>
 		<p:dialog widgetVar="thongbao" styleClass="noticedialog"
 			header="Thông báo" style="height:10px" resizable="false">
@@ -269,7 +275,7 @@
 			<div
 				style="width: 1190px; height: auto; margin: auto; margin-top: 10px; background: white; padding: 20px; border-radius: 5px;">
 				<ui:insert name="content">
-					
+
 				</ui:insert>
 				<ui:include src="/dialog/Thongbaohethong.xhtml" />
 				<ui:include src="/dialog/Caidathethong.xhtml" />
