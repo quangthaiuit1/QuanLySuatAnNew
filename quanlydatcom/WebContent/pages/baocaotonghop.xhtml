@@ -585,23 +585,32 @@
 				</div>
 				<div class="ui-g-6"
 					style="margin: 0 auto; width: 60%; float: none !important">
-					<div class="ui-g-6">
-						<p:fieldset legend="Chọn ngày:" styleClass="noneformatfs"
+					<div class="ui-g-4">
+						<p:fieldset legend="Từ ngày:" styleClass="noneformatfs"
 							style=" height:60px">
 							<p:calendar styleClass="stwidth" locale="vi"
-								value="#{baoCaoBean.dateSearch}" id="dateSearchKDKi"
+								value="#{baoCaoBean.fromDateAte}" id="fromDateKDKi"
 								pattern="#{applicationBean.cf.formatDate}"
 								showButtonPanel="true" navigator="true"
 								mask="#{applicationBean.cf.maskDate}" />
 						</p:fieldset>
 					</div>
-					<div class="ui-g-6">
+					<div class="ui-g-4">
+						<p:fieldset legend="Đến ngày:" styleClass="noneformatfs"
+							style=" height:60px">
+							<p:calendar styleClass="stwidth" locale="vi"
+								value="#{baoCaoBean.toDateAte}" id="toDateKDKi"
+								pattern="#{applicationBean.cf.formatDate}"
+								showButtonPanel="true" navigator="true"
+								mask="#{applicationBean.cf.maskDate}" />
+						</p:fieldset>
+					</div>
+					<div class="ui-g-4">
 						<p:fieldset
 							style=" width:80%;margin-left:4%;height:50px;margin-top:10px"
 							styleClass="noneformatfs">
 							<p:commandButton value="Xuất excel" styleClass="btsave"
 								style="float:right;margin-top:10px" ajax="false"
-								onclick="monitorExporting(showProgress, closeLoader);"
 								id="btnExcelKDKi"
 								actionListener="#{baoCaoBean.baoCaoNVKhongDangKyExcel()}" />
 						</p:fieldset>

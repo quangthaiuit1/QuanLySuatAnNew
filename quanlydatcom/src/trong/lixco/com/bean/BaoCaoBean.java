@@ -340,83 +340,87 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 	// bao cao danh sach nhan vien khong dang ky mon an
 	public void baoCaoNVKhongDangKyExcel() {
 		try {
-			String nameSheet = "";
-			Date dateSearchWithoutTime = DateUtil.DATE_WITHOUT_TIME(dateSearch);
-			nameSheet = "DS NV Ngay " + formatter.format(dateSearch);
-			List<EmployeeData> employeeNotReg = new ArrayList<>();
-			// kiem tra nhan vien co dang ky com chua
-			List<EmployeeData> totalEmp = totalEmployeeHCM();
-			for (int i = 0; i < totalEmp.size(); i++) {
-				boolean isRegister = false;
-				OrderFood ofCheck = ORDER_FOOD_SERVICE.findByDateAndEmployeeCode(dateSearchWithoutTime,
-						totalEmp.get(i).getCode());
-				if (ofCheck.getId() != null) {
-					List<OrderAndFoodByDate> ofbdsByEmpl = ORDER_AND_FOOD_BY_DATE_SERVICE
-							.findByShiftsId(ofCheck.getId(), 0);
-					// chua dang ky suat an nao
-					if (!ofbdsByEmpl.isEmpty()) {
-						isRegister = true;
+			XSSFWorkbook workbook = new XSSFWorkbook();
+			// de hien thi ngay cuoi cung hoac chon 1 ngay
+			toDateAte = DateUtil.addDays(toDateAte, 1);
+			// them mon tu chon vao list
+			for (Date date = fromDateAte; date.before(toDateAte); date = DateUtil.addDays(date, 1)) {
+				String nameSheet = "";
+				Date dateSearchWithoutTime = DateUtil.DATE_WITHOUT_TIME(date);
+				nameSheet = "DS NV Ngay " + formatter.format(date);
+				List<EmployeeData> employeeNotReg = new ArrayList<>();
+				// kiem tra nhan vien co dang ky com chua
+				List<EmployeeData> totalEmp = totalEmployeeHCM();
+				for (int i = 0; i < totalEmp.size(); i++) {
+					boolean isRegister = false;
+					OrderFood ofCheck = ORDER_FOOD_SERVICE.findByDateAndEmployeeCode(dateSearchWithoutTime,
+							totalEmp.get(i).getCode());
+					if (ofCheck.getId() != null) {
+						List<OrderAndFoodByDate> ofbdsByEmpl = ORDER_AND_FOOD_BY_DATE_SERVICE
+								.findByShiftsId(ofCheck.getId(), 0);
+						// chua dang ky suat an nao
+						if (!ofbdsByEmpl.isEmpty()) {
+							isRegister = true;
+						}
+					}
+					if (!isRegister) {
+						employeeNotReg.add(totalEmp.get(i));
 					}
 				}
-				if (!isRegister) {
-					employeeNotReg.add(totalEmp.get(i));
-				}
-			}
 
-			XSSFWorkbook workbook = new XSSFWorkbook();
-			XSSFSheet sheet = null;
-			sheet = workbook.createSheet(nameSheet);
+				XSSFSheet sheet = null;
+				sheet = workbook.createSheet(nameSheet);
+				int rownum = 0;
+				Cell cell;
+				Row row;
+				XSSFCellStyle style = createStyleForTitle(workbook);
+				style.setAlignment(CellStyle.ALIGN_CENTER);
 
-			int rownum = 0;
-			Cell cell;
-			Row row;
-			XSSFCellStyle style = createStyleForTitle(workbook);
-			style.setAlignment(CellStyle.ALIGN_CENTER);
+				// cell style for date
+				XSSFCellStyle cellStyleDate = workbook.createCellStyle();
+				CreationHelper createHelper = workbook.getCreationHelper();
+				cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
 
-			// cell style for date
-			XSSFCellStyle cellStyleDate = workbook.createCellStyle();
-			CreationHelper createHelper = workbook.getCreationHelper();
-			cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+				row = sheet.createRow(rownum);
 
-			row = sheet.createRow(rownum);
+				// EmpNo
+				cell = row.createCell(0);
+				cell.setCellValue("Mã NV");
+				// xep loai// EmpName
+				cell = row.createCell(1);
+				cell.setCellValue("Tên NV");
+				cell.setCellStyle(style);
+				// Salary
+				cell = row.createCell(2);
+				cell.setCellValue("Phòng ban");
+				cell.setCellStyle(style);
 
-			// EmpNo
-			cell = row.createCell(0);
-			cell.setCellValue("Mã NV");
-			// xep loai// EmpName
-			cell = row.createCell(1);
-			cell.setCellValue("Tên NV");
-			cell.setCellStyle(style);
-			// Salary
-			cell = row.createCell(2);
-			cell.setCellValue("Phòng ban");
-			cell.setCellStyle(style);
+				cell = row.createCell(3);
+				cell.setCellValue("Ngày");
+				cell.setCellStyle(style);
 
-			cell = row.createCell(3);
-			cell.setCellValue("Ngày");
-			cell.setCellStyle(style);
+				// Data
+				if (!employeeNotReg.isEmpty()) {
+					for (EmployeeData f : employeeNotReg) {
+						// Gson gson = new Gson();
+						rownum++;
+						row = sheet.createRow(rownum);
 
-			// Data
-			if (!employeeNotReg.isEmpty()) {
-				for (EmployeeData f : employeeNotReg) {
-					// Gson gson = new Gson();
-					rownum++;
-					row = sheet.createRow(rownum);
+						// ma nhan vien
+						cell = row.createCell(0);
+						cell.setCellValue(f.getCode());
+						// ten nhan vien
+						cell = row.createCell(1);
+						cell.setCellValue(f.getName());
 
-					// ma nhan vien
-					cell = row.createCell(0);
-					cell.setCellValue(f.getCode());
-					// ten nhan vien
-					cell = row.createCell(1);
-					cell.setCellValue(f.getName());
-
-					// ten phong ban
-					cell = row.createCell(2);
-					cell.setCellValue(f.getNameDepart());
-					// ngay
-					cell = row.createCell(3);
-					cell.setCellValue(dateSearchWithoutTime);
-					cell.setCellStyle(cellStyleDate);
+						// ten phong ban
+						cell = row.createCell(2);
+						cell.setCellValue(f.getNameDepart());
+						// ngay
+						cell = row.createCell(3);
+						cell.setCellValue(dateSearchWithoutTime);
+						cell.setCellStyle(cellStyleDate);
+					}
 				}
 			}
 
@@ -428,6 +432,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 			workbook.write(externalContext.getResponseOutputStream());
 			// cancel progress
 			facesContext.responseComplete();
+//			PrimeFaces.current().executeScript("PF('progressLoader').hide();");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
