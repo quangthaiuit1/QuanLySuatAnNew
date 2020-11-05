@@ -50,32 +50,12 @@
 </style>
 		<script type="text/javascript">
     //<![CDATA[
-		function start() {
-		     
-		    window['progress'] = setInterval(function() {
-		var pbClient = PF('pbClient'),
-		oldValue = pbClient.getValue(),
-		newValue = oldValue + 10;
-		         
-		pbClient.setValue(pbClient.getValue() + 10);
-		     
-		if(newValue === 100) {
-		    clearInterval(window['progress']);
-		}
-		 
-		 
-		    }, 1000);
-		}
-		 
-		function cancel() {
-		    clearInterval(window['progress']);
-		    PF('pbClient').setValue(0);
-		    PF('startButton1').enable();
-		}
 		 function showProgress() {
+			 console.log("Hello world!");
 	         PF('progressLoader').show();
 	       }
-	       function closeLoader() {
+	       function hideProgress() {
+	    	   console.log("End Hello world!");
 	         PF('progressLoader').hide();
 	       }
     //]]>
@@ -610,14 +590,20 @@
 							style=" width:80%;margin-left:4%;height:50px;margin-top:10px"
 							styleClass="noneformatfs">
 							<p:commandButton value="Xuất excel" styleClass="btsave"
+								disabled="#{baoCaoBean.disable}"
 								style="float:right;margin-top:10px" ajax="false"
-								id="btnExcelKDKi"
+								id="btnExcelKDKi" update=":formBaoCao"
+								onclick="target='_blank';"
 								actionListener="#{baoCaoBean.baoCaoNVKhongDangKyExcel()}" />
 						</p:fieldset>
 					</div>
 				</div>
 			</p:fieldset>
 			<!-- END  -->
+			<p:dialog widgetVar="progressLoader" id="divProgress" modal="true"
+				draggable="false" resizable="false" showHeader="false">
+				<p:graphicImage library="gfx" name="icon-loading.gif" />
+			</p:dialog>
 		</h:form>
 		<!-- DIALOG HANDLE SHOW CHI TIET -->
 		<p:dialog widgetVar="wdvDialogFoodCustomer" width="800" height="400"
@@ -698,10 +684,6 @@
 					</p:column>
 				</p:dataTable>
 			</h:form>
-		</p:dialog>
-		<p:dialog widgetVar="progressLoader" id="divProgress" modal="true"
-			draggable="false" resizable="false" showHeader="false">
-			<p:graphicImage library="gfx" name="icon-loading.gif" />
 		</p:dialog>
 	</ui:define>
 </ui:composition>

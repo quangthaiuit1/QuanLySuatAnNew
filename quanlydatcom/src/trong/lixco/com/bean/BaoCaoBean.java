@@ -77,6 +77,7 @@ import trong.lixco.com.servicepublic.EmployeeServicePublicProxy;
 @ViewScoped
 public class BaoCaoBean extends AbstractBean<OrderFood> {
 	private static final long serialVersionUID = 1L;
+	boolean isDisable = false;
 	SimpleDateFormat formatter;
 	private String loaiBaoCao;
 	private List<FoodNhaAn> foodNhaAns;
@@ -347,7 +348,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 			for (Date date = fromDateAte; date.before(toDateAte); date = DateUtil.addDays(date, 1)) {
 				String nameSheet = "";
 				Date dateSearchWithoutTime = DateUtil.DATE_WITHOUT_TIME(date);
-				nameSheet = "DS NV Ngay " + formatter.format(date);
+				nameSheet = "Ngay " + formatter.format(date);
 				List<EmployeeData> employeeNotReg = new ArrayList<>();
 				// kiem tra nhan vien co dang ky com chua
 				List<EmployeeData> totalEmp = totalEmployeeHCM();
@@ -431,8 +432,13 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 			externalContext.setResponseHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 			workbook.write(externalContext.getResponseOutputStream());
 			// cancel progress
+			// PrimeFaces.current().executeScript("PF('progressLoader').hide();");
+			// cancel progress
+
+			// this.isDisable = false;
+			// PrimeFaces.current().ajax().update(":formBaoCao:btnExcelKDKi");
 			facesContext.responseComplete();
-//			PrimeFaces.current().executeScript("PF('progressLoader').hide();");
+			// onclick="PrimeFaces.monitorDownload(showProgress, hideProgress);"
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -2267,5 +2273,13 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 
 	public void setShiftsSelected(Shifts shiftsSelected) {
 		this.shiftsSelected = shiftsSelected;
+	}
+
+	public boolean isDisable() {
+		return isDisable;
+	}
+
+	public void setDisable(boolean isDisable) {
+		this.isDisable = isDisable;
 	}
 }
