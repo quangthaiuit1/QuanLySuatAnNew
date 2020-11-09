@@ -238,44 +238,33 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 					// 8C la ca sang 6h->6h toi -> bao gom nhan vien van phong
 					// va cong nhan
 					arr = TimekeepingDataService.timtheongay(dateSearchString);
+					// loc ra nhan vien di ca CD
+					List<TimekeepingData> arrAfterFilter = new ArrayList<>();
+					for (int i = 0; i < arr.length; i++) {
+						if (arr[i].getWorkTemp() == null) {
+							// System.out.println("index: " + i);
+							// System.out.println(arr[i].getCode());
+						}
+						if (arr[i].getWorkTemp() != null && !arr[i].getWorkTemp().equals("CD")) {
+							arrAfterFilter.add(arr[i]);
+						}
+					}
+					arr = arrAfterFilter.toArray(new TimekeepingData[arrAfterFilter.size()]);
+
 					this.shiftsExactly = 1;
 					checkShifts0 = true;
 				}
 				if (shiftsExactly == ShiftsUtil.SHIFTS1_ID && !checkShifts0) {
 					// 8C la ca sang 6h->6h toi // gom nv van phong va cong nhan
 					arr = TimekeepingDataService.timtheongay(dateSearchString);
-					// System.out.println("arr: " + arr.length);
-					//
-					// TimekeepingData[] arrCD =
-					// TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString,
-					// "CD");
-					// if (arrCD != null) {
-					// System.out.println("arrCD: " + arrCD.length);
-					// }
-					//
-					// TimekeepingData[] arr8C =
-					// TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString,
-					// "8C");
-					// if (arr8C != null) {
-					// System.out.println("arr8C: " + arr8C.length);
-					// }
-					//
-					// // loc ra nhan vien di ca CD
-					// List<TimekeepingData> arrAfterFilter = new ArrayList<>();
-					// for (int i = 0; i < arr.length; i++) {
-					// if (arr[i].getWorkTemp() == null) {
-					// System.out.println("index: " + i);
-					// System.out.println(arr[i].getCode());
-					// }
-					// if ((arr[i].getWorkTemp() != null &&
-					// arr[i].getWorkTemp().equals("8"))
-					// || (arr[i].getWorkTemp() != null &&
-					// arr[i].getWorkTemp().equals("8C"))) {
-					// arrAfterFilter.add(arr[i]);
-					// }
-					// }
-					// arr = arrAfterFilter.toArray(new
-					// TimekeepingData[arrAfterFilter.size()]);
+					// loc ra nhan vien di ca CD
+					List<TimekeepingData> arrAfterFilter = new ArrayList<>();
+					for (int i = 0; i < arr.length; i++) {
+						if (arr[i].getWorkTemp() != null && !arr[i].getWorkTemp().equals("CD")) {
+							arrAfterFilter.add(arr[i]);
+						}
+					}
+					arr = arrAfterFilter.toArray(new TimekeepingData[arrAfterFilter.size()]);
 				}
 				if (shiftsExactly == ShiftsUtil.SHIFTS2_ID) {
 					// nhan vien di ca
@@ -349,23 +338,31 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 				String nameSheet = "";
 				Date dateSearchWithoutTime = DateUtil.DATE_WITHOUT_TIME(date);
 				nameSheet = "Ngay " + formatter.format(date);
-				List<EmployeeData> employeeNotReg = new ArrayList<>();
+				List<EmployeeDTO> employeeNotReg = new ArrayList<>();
 				// kiem tra nhan vien co dang ky com chua
-				List<EmployeeData> totalEmp = totalEmployeeHCM();
-				for (int i = 0; i < totalEmp.size(); i++) {
-					boolean isRegister = false;
-					OrderFood ofCheck = ORDER_FOOD_SERVICE.findByDateAndEmployeeCode(dateSearchWithoutTime,
-							totalEmp.get(i).getCode());
-					if (ofCheck.getId() != null) {
-						List<OrderAndFoodByDate> ofbdsByEmpl = ORDER_AND_FOOD_BY_DATE_SERVICE
-								.findByShiftsId(ofCheck.getId(), 0);
-						// chua dang ky suat an nao
-						if (!ofbdsByEmpl.isEmpty()) {
-							isRegister = true;
+				// List<EmployeeData> totalEmp = totalEmployeeHCM();
+
+				DateFormat formatter1 = new SimpleDateFormat("dd/MM/yyyy");
+				String dateSearchString = formatter1.format(date);
+				TimekeepingData[] arr = null;
+				arr = TimekeepingDataService.timtheongay(dateSearchString);
+				if (arr != null) {
+					for (int i = 0; i < arr.length; i++) {
+						boolean isRegister = false;
+						OrderFood ofCheck = ORDER_FOOD_SERVICE.findByDateAndEmployeeCode(dateSearchWithoutTime,
+								arr[i].getCode());
+						if (ofCheck.getId() != null) {
+							List<OrderAndFoodByDate> ofbdsByEmpl = ORDER_AND_FOOD_BY_DATE_SERVICE
+									.findByShiftsId(ofCheck.getId(), 0);
+							// chua dang ky suat an nao
+							if (!ofbdsByEmpl.isEmpty()) {
+								isRegister = true;
+							}
 						}
-					}
-					if (!isRegister) {
-						employeeNotReg.add(totalEmp.get(i));
+						if (!isRegister) {
+							EmployeeDTO eTemp = EMPLOYEE_SERVICE_PUBLIC.findByCode(arr[i].getCode());
+							employeeNotReg.add(eTemp);
+						}
 					}
 				}
 
@@ -402,7 +399,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 
 				// Data
 				if (!employeeNotReg.isEmpty()) {
-					for (EmployeeData f : employeeNotReg) {
+					for (EmployeeDTO f : employeeNotReg) {
 						// Gson gson = new Gson();
 						rownum++;
 						row = sheet.createRow(rownum);
@@ -431,14 +428,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 			externalContext.setResponseContentType("application/vnd.ms-excel");
 			externalContext.setResponseHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 			workbook.write(externalContext.getResponseOutputStream());
-			// cancel progress
-			// PrimeFaces.current().executeScript("PF('progressLoader').hide();");
-			// cancel progress
-
-			// this.isDisable = false;
-			// PrimeFaces.current().ajax().update(":formBaoCao:btnExcelKDKi");
 			facesContext.responseComplete();
-			// onclick="PrimeFaces.monitorDownload(showProgress, hideProgress);"
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -713,44 +703,51 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 					// 8C la ca sang 6h->6h toi -> bao gom nhan vien van phong
 					// va cong nhan
 					arr = TimekeepingDataService.timtheongay(dateSearchString);
+
+					// loc ra nhan vien di ca CD
+					List<TimekeepingData> arrAfterFilter = new ArrayList<>();
+					for (int i = 0; i < arr.length; i++) {
+						if (arr[i].getWorkTemp() == null) {
+							// System.out.println("index: " + i);
+							// System.out.println(arr[i].getCode());
+						}
+						// if ((arr[i].getWorkTemp() != null &&
+						// arr[i].getWorkTemp().equals("8"))
+						// || (arr[i].getWorkTemp() != null &&
+						// arr[i].getWorkTemp().equals("8C"))) {
+						// arrAfterFilter.add(arr[i]);
+						// }
+						if (arr[i].getWorkTemp() != null && !arr[i].getWorkTemp().equals("CD")) {
+							arrAfterFilter.add(arr[i]);
+						}
+					}
+					arr = arrAfterFilter.toArray(new TimekeepingData[arrAfterFilter.size()]);
+
 					this.shiftsExactly = 1;
 					checkShifts0 = true;
 				}
 				if (shiftsExactly == ShiftsUtil.SHIFTS1_ID && !checkShifts0) {
 					// 8C la ca sang 6h->6h toi // gom nv van phong va cong nhan
 					arr = TimekeepingDataService.timtheongay(dateSearchString);
-					// System.out.println("arr: " + arr.length);
-					//
-					// TimekeepingData[] arrCD =
-					// TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString,
-					// "CD");
-					// if (arrCD != null) {
-					// System.out.println("arrCD: " + arrCD.length);
-					// }
-					//
-					// TimekeepingData[] arr8C =
-					// TimekeepingDataService.searchByDateAndWorkTemp(dateSearchString,
-					// "8C");
-					// if (arr8C != null) {
-					// System.out.println("arr8C: " + arr8C.length);
-					// }
-					//
-					// // loc ra nhan vien di ca CD
-					// List<TimekeepingData> arrAfterFilter = new ArrayList<>();
-					// for (int i = 0; i < arr.length; i++) {
-					// if (arr[i].getWorkTemp() == null) {
-					// System.out.println("index: " + i);
-					// System.out.println(arr[i].getCode());
-					// }
-					// if ((arr[i].getWorkTemp() != null &&
-					// arr[i].getWorkTemp().equals("8"))
-					// || (arr[i].getWorkTemp() != null &&
-					// arr[i].getWorkTemp().equals("8C"))) {
-					// arrAfterFilter.add(arr[i]);
-					// }
-					// }
-					// arr = arrAfterFilter.toArray(new
-					// TimekeepingData[arrAfterFilter.size()]);
+
+					// loc ra nhan vien di ca CD
+					List<TimekeepingData> arrAfterFilter = new ArrayList<>();
+					for (int i = 0; i < arr.length; i++) {
+						if (arr[i].getWorkTemp() == null) {
+							// System.out.println("index: " + i);
+							// System.out.println(arr[i].getCode());
+						}
+						// if ((arr[i].getWorkTemp() != null &&
+						// arr[i].getWorkTemp().equals("8"))
+						// || (arr[i].getWorkTemp() != null &&
+						// arr[i].getWorkTemp().equals("8C"))) {
+						// arrAfterFilter.add(arr[i]);
+						// }
+						if (arr[i].getWorkTemp() != null && !arr[i].getWorkTemp().equals("CD")) {
+							arrAfterFilter.add(arr[i]);
+						}
+					}
+					arr = arrAfterFilter.toArray(new TimekeepingData[arrAfterFilter.size()]);
 				}
 				if (shiftsExactly == ShiftsUtil.SHIFTS2_ID) {
 					// nhan vien di ca

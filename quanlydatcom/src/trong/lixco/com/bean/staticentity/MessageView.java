@@ -6,21 +6,21 @@ import javax.faces.context.FacesContext;
 public class MessageView {
 	static public void INFO(String message) {
 		FacesContext.getCurrentInstance().addMessage(null,
-				new FacesMessage(FacesMessage.SEVERITY_INFO, "Th鬾g b醥", message));
+				new FacesMessage(FacesMessage.SEVERITY_INFO, "Th么ng b谩o", message));
 	}
 
 	static public void WARN(String message) {
 		FacesContext.getCurrentInstance().addMessage(null,
-				new FacesMessage(FacesMessage.SEVERITY_WARN, "Th鬾g b醥", message));
+				new FacesMessage(FacesMessage.SEVERITY_WARN, "Th么ng b谩o", message));
 	}
 
 	static public void ERROR(String message) {
 		FacesContext.getCurrentInstance().addMessage(null,
-				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Th鬾g b醥", message));
+				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Th么ng b谩o", message));
 	}
 
 	static public void FATAL(String message) {
 		FacesContext.getCurrentInstance().addMessage(null,
-				new FacesMessage(FacesMessage.SEVERITY_FATAL, "Th鬾g b醥", message));
+				new FacesMessage(FacesMessage.SEVERITY_FATAL, "Th么ng b谩o", message));
 	}
 }
