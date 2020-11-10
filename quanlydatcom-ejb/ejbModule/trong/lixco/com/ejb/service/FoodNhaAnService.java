@@ -221,4 +221,35 @@ public class FoodNhaAnService extends AbstractService<FoodNhaAn> {
 		}
 	}
 
+	// find theo ngay, ma nhan vien
+	public List<FoodNhaAn> find(java.util.Date dateSearch, String employeeCode) {
+		// primary
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<FoodNhaAn> cq = cb.createQuery(FoodNhaAn.class);
+		Root<FoodNhaAn> root = cq.from(FoodNhaAn.class);
+		List<Predicate> queries = new ArrayList<>();
+		if (dateSearch != null) {
+			Predicate dateQuery = cb.equal(root.get("food_date"), dateSearch);
+			queries.add(dateQuery);
+		}
+		if (employeeCode != null) {
+			Predicate shiftsQuery = cb.equal(root.get("employee_code"), employeeCode);
+			queries.add(shiftsQuery);
+		}
+
+		Predicate data[] = new Predicate[queries.size()];
+		for (int i = 0; i < queries.size(); i++) {
+			data[i] = queries.get(i);
+		}
+		Predicate finalPredicate = cb.and(data);
+		cq.where(finalPredicate);
+		TypedQuery<FoodNhaAn> query = em.createQuery(cq);
+		List<FoodNhaAn> results = query.getResultList();
+		if (!results.isEmpty()) {
+			return results;
+		} else {
+			return new ArrayList<FoodNhaAn>();
+		}
+	}
+
 }

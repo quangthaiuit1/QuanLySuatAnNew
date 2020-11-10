@@ -167,7 +167,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 		toDateAte = currentDate00;
 
 		dateSearchExactly = currentDate00;
-		checkedRenderView = new boolean[11];
+		checkedRenderView = new boolean[12];
 		for (int i = 0; i < checkedRenderView.length; i++) {
 			checkedRenderView[i] = false;
 		}
@@ -182,7 +182,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 		}
 		if (valueChecked != 0) {
 			// thay i < tai day
-			for (int i = 1; i < 10; i++) {
+			for (int i = 1; i < 11; i++) {
 				if (valueChecked == i) {
 					checkedRenderView[i - 1] = true;
 				} else {
@@ -423,6 +423,107 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 			}
 
 			String filename = "DSKhongDK.xlsx";
+			FacesContext facesContext = FacesContext.getCurrentInstance();
+			ExternalContext externalContext = facesContext.getExternalContext();
+			externalContext.setResponseContentType("application/vnd.ms-excel");
+			externalContext.setResponseHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+			workbook.write(externalContext.getResponseOutputStream());
+			facesContext.responseComplete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// bao cao danh sach nhan vien khong quet van tay (duoi nha an)
+	public void baoCaoNVKhongQuetVanTayExcel() {
+		try {
+			XSSFWorkbook workbook = new XSSFWorkbook();
+			// de hien thi ngay cuoi cung hoac chon 1 ngay
+			toDateAte = DateUtil.addDays(toDateAte, 1);
+			// them mon tu chon vao list
+			for (Date date = fromDateAte; date.before(toDateAte); date = DateUtil.addDays(date, 1)) {
+				String nameSheet = "";
+				Date dateSearchWithoutTime = DateUtil.DATE_WITHOUT_TIME(date);
+				nameSheet = "Ngay " + formatter.format(date);
+				List<EmployeeDTO> employeeNotReg = new ArrayList<>();
+				// kiem tra nhan vien co dang ky com chua
+				// List<EmployeeData> totalEmp = totalEmployeeHCM();
+
+				DateFormat formatter1 = new SimpleDateFormat("dd/MM/yyyy");
+				String dateSearchString = formatter1.format(date);
+				TimekeepingData[] arr = null;
+				arr = TimekeepingDataService.timtheongay(dateSearchString);
+				if (arr != null) {
+					for (int i = 0; i < arr.length; i++) {
+						boolean isFingerChecked = false;
+						List<FoodNhaAn> ofCheck = FOOD_NHA_AN_SERVICE.find(dateSearchWithoutTime, arr[i].getCode());
+						if (!ofCheck.isEmpty()) {
+							isFingerChecked = true;
+						}
+						if (!isFingerChecked) {
+							EmployeeDTO eTemp = EMPLOYEE_SERVICE_PUBLIC.findByCode(arr[i].getCode());
+							employeeNotReg.add(eTemp);
+						}
+					}
+				}
+
+				XSSFSheet sheet = null;
+				sheet = workbook.createSheet(nameSheet);
+				int rownum = 0;
+				Cell cell;
+				Row row;
+				XSSFCellStyle style = createStyleForTitle(workbook);
+				style.setAlignment(CellStyle.ALIGN_CENTER);
+
+				// cell style for date
+				XSSFCellStyle cellStyleDate = workbook.createCellStyle();
+				CreationHelper createHelper = workbook.getCreationHelper();
+				cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+
+				row = sheet.createRow(rownum);
+
+				// EmpNo
+				cell = row.createCell(0);
+				cell.setCellValue("Mã NV");
+				// xep loai// EmpName
+				cell = row.createCell(1);
+				cell.setCellValue("Tên NV");
+				cell.setCellStyle(style);
+				// Salary
+				cell = row.createCell(2);
+				cell.setCellValue("Phòng ban");
+				cell.setCellStyle(style);
+
+				cell = row.createCell(3);
+				cell.setCellValue("Ngày");
+				cell.setCellStyle(style);
+
+				// Data
+				if (!employeeNotReg.isEmpty()) {
+					for (EmployeeDTO f : employeeNotReg) {
+						// Gson gson = new Gson();
+						rownum++;
+						row = sheet.createRow(rownum);
+
+						// ma nhan vien
+						cell = row.createCell(0);
+						cell.setCellValue(f.getCode());
+						// ten nhan vien
+						cell = row.createCell(1);
+						cell.setCellValue(f.getName());
+
+						// ten phong ban
+						cell = row.createCell(2);
+						cell.setCellValue(f.getNameDepart());
+						// ngay
+						cell = row.createCell(3);
+						cell.setCellValue(dateSearchWithoutTime);
+						cell.setCellStyle(cellStyleDate);
+					}
+				}
+			}
+
+			String filename = "DS-khong-quet-vt.xlsx";
 			FacesContext facesContext = FacesContext.getCurrentInstance();
 			ExternalContext externalContext = facesContext.getExternalContext();
 			externalContext.setResponseContentType("application/vnd.ms-excel");

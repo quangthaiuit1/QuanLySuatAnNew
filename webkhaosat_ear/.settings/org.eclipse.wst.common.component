@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="webkhaosat_ear">
+        <wb-resource deploy-path="/" source-path="/EarContent" tag="defaultRootSource"/>
+        <dependent-module archiveName="webkhaosat_web.war" deploy-path="/" handle="module:/resource/webkhaosat_web/webkhaosat_web">
+            <dependent-object/>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="webkhaosat_ejb.jar" deploy-path="/" handle="module:/resource/webkhaosat_ejb/webkhaosat_ejb">
+            <dependent-object/>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="webkhaosat_jpa.jar" deploy-path="/lib" handle="module:/resource/webkhaosat_jpa/webkhaosat_jpa">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+    </wb-module>
+</project-modules>

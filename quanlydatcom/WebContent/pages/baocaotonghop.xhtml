@@ -88,6 +88,9 @@
 							itemValue="8" />
 						<f:selectItem itemLabel="Danh sách NV không đăng ký cơm"
 							itemValue="9" />
+						<f:selectItem
+							itemLabel="Danh sách NV không quét vân tay (dưới nhà ăn)"
+							itemValue="10" />
 						<p:ajax listener="#{baoCaoBean.handleRenderView()}"
 							process="@this" />
 					</p:selectOneMenu>
@@ -309,7 +312,7 @@
 							styleClass="noneformatfs">
 							<p:commandButton value="Xuất excel" styleClass="btsave"
 								style="float:right;margin-top:10px" ajax="false"
-								id="btnXuatExcel"
+								onclick="this.form.target='_blank'" id="btnXuatExcel"
 								actionListener="#{baoCaoBean.baoCaoTheoNgayExcel()}" />
 						</p:fieldset>
 					</div>
@@ -555,6 +558,49 @@
 				</div>
 			</p:fieldset>
 			<!-- End DANH SACH NV DK COM NHUNG KHONG AN -->
+			<!-- DANH SACH NHAN VIEN KHONG QUET VAN TAY -->
+			<p:fieldset rendered="#{baoCaoBean.checkedRenderView[9]}">
+				<div class="ui-g">
+					<h3>Danh sách nhân viên không quét vân tay (dưới nhà ăn)</h3>
+				</div>
+				<div class="ui-g">
+					<p:separator style="width:100%;float:left" />
+				</div>
+				<div class="ui-g-6"
+					style="margin: 0 auto; width: 60%; float: none !important">
+					<div class="ui-g-4">
+						<p:fieldset legend="Từ ngày:" styleClass="noneformatfs"
+							style=" height:60px">
+							<p:calendar styleClass="stwidth" locale="vi"
+								value="#{baoCaoBean.fromDateAte}"
+								pattern="#{applicationBean.cf.formatDate}"
+								showButtonPanel="true" navigator="true"
+								mask="#{applicationBean.cf.maskDate}" />
+						</p:fieldset>
+					</div>
+					<div class="ui-g-4">
+						<p:fieldset legend="Đến ngày:" styleClass="noneformatfs"
+							style=" height:60px">
+							<p:calendar styleClass="stwidth" locale="vi"
+								value="#{baoCaoBean.toDateAte}"
+								pattern="#{applicationBean.cf.formatDate}"
+								showButtonPanel="true" navigator="true"
+								mask="#{applicationBean.cf.maskDate}" />
+						</p:fieldset>
+					</div>
+					<div class="ui-g-4">
+						<p:fieldset
+							style=" width:80%;margin-left:4%;height:50px;margin-top:10px"
+							styleClass="noneformatfs">
+							<p:commandButton value="Xuất excel" styleClass="btsave"
+								style="float:right;margin-top:10px" ajax="false"
+								id="btnExcelKQuetVT" update=":formBaoCao"
+								onclick="target='_blank';"
+								actionListener="#{baoCaoBean.baoCaoNVKhongQuetVanTayExcel()}" />
+						</p:fieldset>
+					</div>
+				</div>
+			</p:fieldset>
 			<!-- DANH SACH NHAN VIEN KHONG DANG KY COM -->
 			<p:fieldset rendered="#{baoCaoBean.checkedRenderView[8]}">
 				<div class="ui-g">
