@@ -19,6 +19,8 @@ import trong.lixco.com.account.servicepublics.DepartmentServicePublicProxy;
 import trong.lixco.com.account.servicepublics.Member;
 import trong.lixco.com.account.servicepublics.MemberServicePublic;
 import trong.lixco.com.account.servicepublics.MemberServicePublicProxy;
+import trong.lixco.com.bean.entities.DepartmentData;
+import trong.lixco.com.bean.entities.DepartmentDataService;
 import trong.lixco.com.bean.entities.EmployeeThai;
 import trong.lixco.com.bean.staticentity.DateUtil;
 import trong.lixco.com.bean.staticentity.MessageView;
@@ -123,7 +125,21 @@ public class SuatAnTangCaBean extends AbstractBean<OrderFood> {
 			}
 			// handle hien toan bo danh sach nhan vien
 			List<String> departmentsString = new ArrayList<>();
-			departmentsString.add(departmentSearch.getCode());
+			// xu ly neu tim theo phong
+			if (departmentSearch.getLevelDep().getLevel() == 2) {
+				DepartmentData[] departmentHCMArray = DepartmentDataService
+						.timtheophongquanly(departmentSearch.getCode());
+				if (departmentHCMArray != null) {
+					for (DepartmentData d : departmentHCMArray) {
+						departmentsString.add(d.getCode());
+					}
+				} else {
+					departmentsString.add(departmentSearch.getCode());
+				}
+			}
+			if (departmentSearch.getLevelDep().getLevel() == 3) {
+				departmentsString.add(departmentSearch.getCode());
+			}
 			String[] departmentsStringArr = departmentsString.toArray(new String[departmentsString.size()]);
 			EmployeeDTO[] employeesArray = EMPLOYEE_SERVICE_PUBLIC.findByDep(departmentsStringArr);
 			if (employeesArray != null) {
