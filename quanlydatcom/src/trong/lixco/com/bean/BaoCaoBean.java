@@ -423,7 +423,11 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 							DepartmentData departmentLevel2 = DepartmentDataService
 									.timtheoma(departmentTemp.getCodeDepart());
 							if (departmentLevel2 != null) {
-								cell.setCellValue(departmentLevel2.getName());
+								if (departmentLevel2.getCode().equals("30005")) {
+									cell.setCellValue(departmentTemp.getName());
+								} else {
+									cell.setCellValue(departmentLevel2.getName());
+								}
 							}
 						}
 						// ngay
@@ -536,7 +540,13 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 							DepartmentData departmentLevel2 = DepartmentDataService
 									.timtheoma(departmentTemp.getCodeDepart());
 							if (departmentLevel2 != null) {
-								cell.setCellValue(departmentLevel2.getName());
+								if (departmentLevel2 != null) {
+									if (departmentLevel2.getCode().equals("30005")) {
+										cell.setCellValue(departmentTemp.getName());
+									} else {
+										cell.setCellValue(departmentLevel2.getName());
+									}
+								}
 							}
 						}
 						// ngay
@@ -1422,7 +1432,13 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 				if (departmentTemp.getLevel() == 3) {
 					DepartmentData departmentLevel2 = DepartmentDataService.timtheoma(departmentTemp.getCodeDepart());
 					if (departmentLevel2 != null) {
-						cell.setCellValue(departmentLevel2.getName());
+						if (departmentLevel2 != null) {
+							if (departmentLevel2.getCode().equals("30005")) {
+								cell.setCellValue(departmentTemp.getName());
+							} else {
+								cell.setCellValue(departmentLevel2.getName());
+							}
+						}
 					}
 				}
 				// ngay
