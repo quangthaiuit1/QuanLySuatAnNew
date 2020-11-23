@@ -413,7 +413,19 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 
 						// ten phong ban
 						cell = row.createCell(2);
-						cell.setCellValue(f.getNameDepart());
+						DepartmentData departmentTemp = DepartmentDataService.timtheoma(f.getCodeDepart());
+						// kiem tra phong ban cap may
+						// phong cap 2
+						if (departmentTemp.getLevel() == 2) {
+							cell.setCellValue(departmentTemp.getName());
+						}
+						if (departmentTemp.getLevel() == 3) {
+							DepartmentData departmentLevel2 = DepartmentDataService
+									.timtheoma(departmentTemp.getCodeDepart());
+							if (departmentLevel2 != null) {
+								cell.setCellValue(departmentLevel2.getName());
+							}
+						}
 						// ngay
 						cell = row.createCell(3);
 						cell.setCellValue(dateSearchWithoutTime);
@@ -514,7 +526,19 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 
 						// ten phong ban
 						cell = row.createCell(2);
-						cell.setCellValue(f.getNameDepart());
+						DepartmentData departmentTemp = DepartmentDataService.timtheoma(f.getCodeDepart());
+						// kiem tra phong ban cap may
+						// phong cap 2
+						if (departmentTemp.getLevel() == 2) {
+							cell.setCellValue(departmentTemp.getName());
+						}
+						if (departmentTemp.getLevel() == 3) {
+							DepartmentData departmentLevel2 = DepartmentDataService
+									.timtheoma(departmentTemp.getCodeDepart());
+							if (departmentLevel2 != null) {
+								cell.setCellValue(departmentLevel2.getName());
+							}
+						}
 						// ngay
 						cell = row.createCell(3);
 						cell.setCellValue(dateSearchWithoutTime);
@@ -671,14 +695,20 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 					cell.setCellValue(employeeTemp.getName());
 				}
 				// phong
-				Department departmentTemp = DEPARTMENT_SERVICE_PUBLIC.findByCode("code",
-						f.getOrder_food().getDepartment_code());
-
-				if (departmentTemp != null) {
-					// ten phong ban
-					cell = row.createCell(2);
+				cell = row.createCell(2);
+				DepartmentData departmentTemp = DepartmentDataService.timtheoma(f.getOrder_food().getDepartment_code());
+				// kiem tra phong ban cap may
+				// phong cap 2
+				if (departmentTemp.getLevel() == 2) {
 					cell.setCellValue(departmentTemp.getName());
 				}
+				if (departmentTemp.getLevel() == 3) {
+					DepartmentData departmentLevel2 = DepartmentDataService.timtheoma(departmentTemp.getCodeDepart());
+					if (departmentLevel2 != null) {
+						cell.setCellValue(departmentLevel2.getName());
+					}
+				}
+
 				// ngay
 				cell = row.createCell(3);
 				cell.setCellValue(f.getOrder_food().getRegistration_date());
@@ -1382,11 +1412,18 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 					cell.setCellValue(employeeTemp.getName());
 				}
 				// phong
-				Department departmentTemp = DEPARTMENT_SERVICE_PUBLIC.findByCode("code", f.getDepartment_code());
-				if (departmentTemp != null) {
-					// ten phong ban
-					cell = row.createCell(2);
-					cell.setCellValue(departmentTemp.getName());
+				cell = row.createCell(2);
+				DepartmentData departmentTemp = DepartmentDataService.timtheoma(f.getDepartment_code());
+				// kiem tra phong ban cap may
+				// phong cap 2
+				if (departmentTemp.getLevel() == 2) {
+					cell.setCellValue(f.getDepartment_name());
+				}
+				if (departmentTemp.getLevel() == 3) {
+					DepartmentData departmentLevel2 = DepartmentDataService.timtheoma(departmentTemp.getCodeDepart());
+					if (departmentLevel2 != null) {
+						cell.setCellValue(departmentLevel2.getName());
+					}
 				}
 				// ngay
 				cell = row.createCell(3);
