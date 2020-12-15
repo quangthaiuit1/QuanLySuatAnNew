@@ -27,7 +27,7 @@ public class CategoryFoodService extends AbstractService<CategoryFood> {
 	private EntityManager em;
 	@Resource
 	private SessionContext ct;
-	
+
 	@Override
 	protected Class<CategoryFood> getEntityClass() {
 		return CategoryFood.class;
@@ -42,7 +42,7 @@ public class CategoryFoodService extends AbstractService<CategoryFood> {
 	protected SessionContext getUt() {
 		return ct;
 	}
-	
+
 	public List<CategoryFood> findByName(String foodName) {
 		// primary
 		CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -61,9 +61,23 @@ public class CategoryFoodService extends AbstractService<CategoryFood> {
 		cq.where(finalPredicate);
 		TypedQuery<CategoryFood> query = em.createQuery(cq);
 		List<CategoryFood> results = query.getResultList();
-		if(!results.isEmpty()) {
+		if (!results.isEmpty()) {
 			return results;
-		}else {
+		} else {
+			return new ArrayList<CategoryFood>();
+		}
+	}
+
+	public List<CategoryFood> findAllNew() {
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<CategoryFood> cq = cb.createQuery(CategoryFood.class);
+		Root<CategoryFood> root = cq.from(CategoryFood.class);
+		cq.select(root);
+		TypedQuery<CategoryFood> query = em.createQuery(cq);
+		List<CategoryFood> results = query.getResultList();
+		if (!results.isEmpty()) {
+			return results;
+		} else {
 			return new ArrayList<CategoryFood>();
 		}
 	}

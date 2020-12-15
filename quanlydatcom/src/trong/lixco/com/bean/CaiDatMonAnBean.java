@@ -76,7 +76,7 @@ public class CaiDatMonAnBean extends AbstractBean<OrderFood> {
 		} catch (Exception e) {
 		}
 		member = getAccount().getMember();
-		categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
+		categoryFoods = CATEGORY_FOOD_SERVICE.findAllNew(); 
 		shifts1 = ShiftsUtil.SHIFTS1_ID;
 		shifts2 = ShiftsUtil.SHIFTS2_ID;
 		shifts3 = ShiftsUtil.SHIFTS3_ID;

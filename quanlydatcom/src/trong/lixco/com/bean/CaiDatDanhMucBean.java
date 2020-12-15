@@ -48,7 +48,7 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 		categoryFoods = new ArrayList<CategoryFood>();
 		// categoryFoodsRemove = new ArrayList<>();
 		try {
-			categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
+			categoryFoods = CATEGORY_FOOD_SERVICE.findAllNew();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -127,12 +127,13 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 				try {
 					boolean delete = CATEGORY_FOOD_SERVICE.delete(item);
 					if (delete) {
-						categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
+						categoryFoods = CATEGORY_FOOD_SERVICE.findAllNew();
 						Notification.NOTI_SUCCESS("Xóa thành công");
 					} else {
 						Notification.NOTI_ERROR("Không thể xóa");
 					}
 				} catch (Exception e) {
+					Notification.NOTI_ERROR("Không thể xóa");
 					e.printStackTrace();
 				}
 			}
@@ -160,7 +161,7 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 					if (cfUpdate != null) {
 						// Notification.NOTI_SUCCESS("Thành công");
 						MessageView.INFO("Thành công");
-						categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
+						categoryFoods = CATEGORY_FOOD_SERVICE.findAllNew();
 						cFoodUpdate = new CategoryFood();
 						PrimeFaces current = PrimeFaces.current();
 						current.executeScript("PF('widgetCapNhatMonAn').hide();");
@@ -168,11 +169,11 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 						Notification.NOTI_ERROR("Thất bại");
 					}
 				} else {
-					categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
+					categoryFoods = CATEGORY_FOOD_SERVICE.findAllNew();
 					Notification.NOTI_ERROR("Tên món ăn đã tồn tại");
 				}
 			} else {
-				categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
+				categoryFoods = CATEGORY_FOOD_SERVICE.findAllNew();
 				Notification.NOTI_ERROR("Tên món ăn đã tồn tại");
 			}
 		} catch (Exception e) {
@@ -191,7 +192,7 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 				if (cfNew != null) {
 					// Notification.NOTI_SUCCESS("Thành công");
 					MessageView.INFO("Thành công");
-					categoryFoods = CATEGORY_FOOD_SERVICE.findAll();
+					categoryFoods = CATEGORY_FOOD_SERVICE.findAllNew();
 					cFoodNew = new CategoryFood();
 					PrimeFaces current = PrimeFaces.current();
 					current.executeScript("PF('widgetThemMonAn').hide();");
