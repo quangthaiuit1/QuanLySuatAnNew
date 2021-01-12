@@ -172,6 +172,44 @@ public class OrderAndFoodByDateService extends AbstractService<OrderAndFoodByDat
 		}
 	}
 
+	// find tu ngay den ngay
+	public List<OrderAndFoodByDate> findByDayToDayDepartmentSortByDateAndShifts(Date firstDay, Date lastDay,
+			List<String> depCodes) {
+		// primary
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<OrderAndFoodByDate> cq = cb.createQuery(OrderAndFoodByDate.class);
+		Root<OrderAndFoodByDate> root = cq.from(OrderAndFoodByDate.class);
+		List<Predicate> queries = new ArrayList<>();
+		if (firstDay != null) {
+			Predicate resultQueryFirst = cb.greaterThanOrEqualTo(root.get("order_food").get("registration_date"),
+					firstDay);
+			queries.add(resultQueryFirst);
+		}
+		if (lastDay != null) {
+			Predicate resultQueryLast = cb.lessThanOrEqualTo(root.get("order_food").get("registration_date"), lastDay);
+			queries.add(resultQueryLast);
+		}
+		if (depCodes != null) {
+			Predicate p = cb.in(root.get("order_food").get("department_code")).value(depCodes);
+			queries.add(p);
+		}
+
+		Predicate data[] = new Predicate[queries.size()];
+		for (int i = 0; i < queries.size(); i++) {
+			data[i] = queries.get(i);
+		}
+		Predicate finalPredicate = cb.and(data);
+		cq.select(root).where(finalPredicate).orderBy(cb.asc(root.get("order_food").get("registration_date")),
+				cb.asc(root.get("food_by_day").get("shifts").get("id")));
+		TypedQuery<OrderAndFoodByDate> query = em.createQuery(cq);
+		List<OrderAndFoodByDate> results = query.getResultList();
+		if (!results.isEmpty()) {
+			return results;
+		} else {
+			return new ArrayList<OrderAndFoodByDate>();
+		}
+	}
+
 	public List<OrderAndFoodByDate> find(Date firstDay, Date lastDay, String employeeCode) {
 		// primary
 		CriteriaBuilder cb = em.getCriteriaBuilder();

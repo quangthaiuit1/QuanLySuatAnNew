@@ -388,7 +388,7 @@
 										<p:outputLabel value="Tuần:" style="float:left" />
 									</div>
 									<div class="ui-g-4">
-										<p:spinner style="width:90%;float:left" size="1" min="1"
+										<p:spinner style="width:90%;float:left" size="1" min="1" max="53"
 											value="#{dangKyComBean.week}">
 											<p:ajax listener="#{dangKyComBean.ajax_setDate()}"
 												update="startDate,endDate" process="@this" />

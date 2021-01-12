@@ -122,21 +122,17 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 	}
 
 	public void deleteRow(CategoryFood item) {
-		for (CategoryFood food : categoryFoods) {
-			if (food.getId() == item.getId()) {
-				try {
-					boolean delete = CATEGORY_FOOD_SERVICE.delete(item);
-					if (delete) {
-						categoryFoods = CATEGORY_FOOD_SERVICE.findAllNew();
-						Notification.NOTI_SUCCESS("Xóa thành công");
-					} else {
-						Notification.NOTI_ERROR("Không thể xóa");
-					}
-				} catch (Exception e) {
-					Notification.NOTI_ERROR("Không thể xóa");
-					e.printStackTrace();
-				}
+		try {
+			boolean delete = CATEGORY_FOOD_SERVICE.delete(item);
+			if (delete) {
+				categoryFoods = CATEGORY_FOOD_SERVICE.findAllNew();
+				Notification.NOTI_SUCCESS("Xóa thành công");
+			} else {
+				Notification.NOTI_ERROR("Không thể xóa");
 			}
+		} catch (Exception e) {
+			Notification.NOTI_ERROR("Không thể xóa");
+			e.printStackTrace();
 		}
 	}
 

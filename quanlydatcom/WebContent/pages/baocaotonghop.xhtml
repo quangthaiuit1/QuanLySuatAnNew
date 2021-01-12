@@ -91,6 +91,9 @@
 						<f:selectItem
 							itemLabel="Danh sách NV không quét vân tay (dưới nhà ăn)"
 							itemValue="10" />
+						<f:selectItem
+							itemLabel="BC chi tiết dự báo suất ăn mới (theo Phòng ban)"
+							itemValue="11" />
 						<p:ajax listener="#{baoCaoBean.handleRenderView()}"
 							process="@this" />
 					</p:selectOneMenu>
@@ -643,6 +646,72 @@
 								actionListener="#{baoCaoBean.baoCaoNVKhongDangKyExcel()}" />
 						</p:fieldset>
 					</div>
+				</div>
+			</p:fieldset>
+			<p:fieldset rendered="#{baoCaoBean.checkedRenderView[10]}">
+				<div class="ui-g" style="width: 100%">
+					<h3>Chi tiết dự báo suất ăn (Phân theo Phòng ban)</h3>
+				</div>
+				<div class="ui-g">
+					<p:separator style="width:100%;float:left" />
+				</div>
+				<div class="ui-g-12">
+					<div class="ui-g-3"></div>
+					<div class="ui-g-6">
+						<p:dataTable value="#{baoCaoBean.departmentSearchs}" var="item"
+							scrollable="true" scrollHeight="200" styleClass="tableformat"
+							paginatorPosition="bottom" rowsPerPageTemplate="60,80,100"
+							paginator="true" rows="80" rowKey="#{item.code}"
+							rowIndexVar="rowIndex" resizableColumns="true">
+							<p:column headerText="..." style="text-align:center" width="30">
+								<p:selectBooleanCheckbox value="#{item.select}">
+									<p:ajax process="@this" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column headerText="Mã" style="text-align:center" width="50">
+								<h:outputText value="#{item.code}" />
+							</p:column>
+							<p:column headerText="Tên phòng ban" filterBy="#{item.name}"
+								filterFunction="#{abstractCustomFilter.filterByText}"
+								style="text-align:left">
+								<h:outputText value="#{item.name}" />
+							</p:column>
+						</p:dataTable>
+					</div>
+					<div class="ui-g-3"></div>
+				</div>
+				<div class="ui-g-12">
+					<div class="ui-g-3"></div>
+					<div class="ui-g-6">
+						<div class="ui-g-4">
+							<p:fieldset id="fieldsetFromDate1" legend="Từ ngày:"
+								styleClass="noneformatfs">
+								<p:calendar styleClass="stwidth" locale="vi"
+									value="#{baoCaoBean.fromDate}" id="dateSearchFromDate1"
+									pattern="#{applicationBean.cf.formatDate}"
+									showButtonPanel="true" navigator="true"
+									mask="#{applicationBean.cf.maskDate}" />
+							</p:fieldset>
+						</div>
+						<div class="ui-g-4">
+							<p:fieldset id="fieldsetToDate1" legend="Đến ngày:"
+								styleClass="noneformatfs">
+								<p:calendar styleClass="stwidth" locale="vi"
+									value="#{baoCaoBean.toDate}" id="dateSearchToDate1"
+									pattern="#{applicationBean.cf.formatDate}"
+									showButtonPanel="true" navigator="true"
+									mask="#{applicationBean.cf.maskDate}" />
+							</p:fieldset>
+						</div>
+						<div class="ui-g-4">
+							<p:commandButton style="float:right;margin-top:22px"
+								process="formBaoCao" styleClass="btsearch" type="submit"
+								value="Xuất PDF" ajax="false"
+								actionListener="#{baoCaoBean.chiTietDuBaoSuatAnPDFNew()}"
+								onclick="this.form.target='_blank'" />
+						</div>
+					</div>
+					<div class="ui-g-3"></div>
 				</div>
 			</p:fieldset>
 			<!-- END  -->

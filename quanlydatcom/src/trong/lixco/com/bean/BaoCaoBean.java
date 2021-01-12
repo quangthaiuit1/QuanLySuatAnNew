@@ -72,11 +72,16 @@ import trong.lixco.com.jpa.entity.Shifts;
 import trong.lixco.com.servicepublic.EmployeeDTO;
 import trong.lixco.com.servicepublic.EmployeeServicePublic;
 import trong.lixco.com.servicepublic.EmployeeServicePublicProxy;
+import trong.lixco.com.util.DepartmentUtil;
 
 @Named
 @ViewScoped
 public class BaoCaoBean extends AbstractBean<OrderFood> {
 	private static final long serialVersionUID = 1L;
+	private Department departmentSearch;
+	private List<Department> departmentSearchs;
+	private List<Department> departmentsSelected;// findAllNew
+
 	boolean isDisable = false;
 	SimpleDateFormat formatter;
 	private String loaiBaoCao;
@@ -141,38 +146,55 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 
 	@Override
 	protected void initItem() {
-		DEPARTMENT_SERVICE_PUBLIC = new DepartmentServicePublicProxy();
-		EMPLOYEE_SERVICE_PUBLIC = new EmployeeServicePublicProxy();
-		formatter = new SimpleDateFormat("dd-MM-yyyy");
-		dateSearch = new Date();
-		shifts1 = ShiftsUtil.SHIFTS1_ID;
-		shifts2 = ShiftsUtil.SHIFTS2_ID;
-		shifts3 = ShiftsUtil.SHIFTS3_ID;
-		// handle shifts
-		allShifts = SHIFTS_SERVICE.findAll();
-		if (allShifts.size() != 0) {
-			shiftsSelected = allShifts.get(0);
+		try {
+			DEPARTMENT_SERVICE_PUBLIC = new DepartmentServicePublicProxy();
+			EMPLOYEE_SERVICE_PUBLIC = new EmployeeServicePublicProxy();
+			formatter = new SimpleDateFormat("dd-MM-yyyy");
+			dateSearch = new Date();
+			shifts1 = ShiftsUtil.SHIFTS1_ID;
+			shifts2 = ShiftsUtil.SHIFTS2_ID;
+			shifts3 = ShiftsUtil.SHIFTS3_ID;
+			// handle shifts
+			allShifts = SHIFTS_SERVICE.findAll();
+			if (allShifts.size() != 0) {
+				shiftsSelected = allShifts.get(0);
+			}
+			// du bao suat an
+			Date currentDate00 = new Date();
+			// currentDate00 = DateUtil.SET_HHMMSS_00(currentDate00);
+			currentDate00 = DateUtil.DATE_WITHOUT_TIME(currentDate00);
+			fromDate = currentDate00;
+			toDate = currentDate00;
+
+			fromDateDetail = currentDate00;
+			toDateDetail = currentDate00;
+
+			fromDateAte = currentDate00;
+			toDateAte = currentDate00;
+
+			dateSearchExactly = currentDate00;
+			checkedRenderView = new boolean[13];
+			for (int i = 0; i < checkedRenderView.length; i++) {
+				checkedRenderView[i] = false;
+			}
+			quantitySelected = new QuantityFood();
+			member = getAccount().getMember();
+			// code moi cho tim theo phong ban
+			departmentSearchs = new ArrayList<Department>();
+			departmentsSelected = new ArrayList<>();
+			Department[] deps = DEPARTMENT_SERVICE_PUBLIC.findAll();
+			for (int i = 0; i < deps.length; i++) {
+				if (deps[i].getLevelDep() != null)
+					if (deps[i].getLevelDep().getLevel() > 1)
+						departmentSearchs.add(deps[i]);
+			}
+			if (departmentSearchs.size() != 0) {
+				departmentSearchs = DepartmentUtil.sort(departmentSearchs);
+				departmentSearch = departmentSearchs.get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		// du bao suat an
-		Date currentDate00 = new Date();
-		// currentDate00 = DateUtil.SET_HHMMSS_00(currentDate00);
-		currentDate00 = DateUtil.DATE_WITHOUT_TIME(currentDate00);
-		fromDate = currentDate00;
-		toDate = currentDate00;
-
-		fromDateDetail = currentDate00;
-		toDateDetail = currentDate00;
-
-		fromDateAte = currentDate00;
-		toDateAte = currentDate00;
-
-		dateSearchExactly = currentDate00;
-		checkedRenderView = new boolean[12];
-		for (int i = 0; i < checkedRenderView.length; i++) {
-			checkedRenderView[i] = false;
-		}
-		quantitySelected = new QuantityFood();
-		member = getAccount().getMember();
 	}
 
 	public void handleRenderView() {
@@ -182,7 +204,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 		}
 		if (valueChecked != 0) {
 			// thay i < tai day
-			for (int i = 1; i < 11; i++) {
+			for (int i = 1; i < 12; i++) {
 				if (valueChecked == i) {
 					checkedRenderView[i - 1] = true;
 				} else {
@@ -1638,6 +1660,183 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 		}
 	}
 
+	public void chiTietDuBaoSuatAnPDFNew() {
+		try {
+			// xu ly cho chon don vi de xuat pdf
+			// list de gan qua report
+			List<OrderAndFoodByDate> ofs = null;
+			List<String> depCodes = new ArrayList<>();
+			for (Department d : departmentSearchs) {
+				if (d.isSelect()) {
+					depCodes.add(d.getCode());
+				}
+			}
+			// neu co phong duoc chon
+			if (!depCodes.isEmpty()) {
+				ofs = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDayToDayDepartmentSortByDateAndShifts(fromDate, toDate,
+						depCodes);
+			}
+			// khong co phong nao duoc chon
+			else {
+				ofs = ORDER_AND_FOOD_BY_DATE_SERVICE.findByDayToDaySortByDateAndShifts(fromDate, toDate, null);
+			}
+
+			// test new
+			List<BaoChenhLech> baoChenhLechs = new ArrayList<>();
+			for (int i = 0; i < ofs.size(); i++) {
+				// neu phan tu dau tien thi khong vao vong for
+				boolean isFirst = false;
+				if (baoChenhLechs.isEmpty()) {
+					BaoChenhLech first = new BaoChenhLech();
+					first.setNgay(DateUtil.DATE_WITHOUT_TIME(ofs.get(i).getOrder_food().getRegistration_date()));
+					first.setCa(ofs.get(i).getFood_by_day().getShifts().getId());
+					first.setTenmonan(ofs.get(i).getFood_by_day().getCategory_food().getName());
+					first.setTenca(ofs.get(i).getFood_by_day().getShifts().getName());
+					first.setSoluongchinhxac(1);
+					first.setIdmonan(ofs.get(i).getFood_by_day().getCategory_food().getId());
+					baoChenhLechs.add(first);
+					isFirst = true;
+				}
+				// khong phai lan dau tien moi vao
+				if (!isFirst) {
+					boolean isExist = false;
+					int position = 0;
+					for (int j = 0; j < baoChenhLechs.size(); j++) {
+						// neu trung ngay, trung ca, trung ten mon se tang so
+						// luong
+						if (DateUtil.DATE_WITHOUT_TIME(ofs.get(i).getOrder_food().getRegistration_date())
+								.equals(baoChenhLechs.get(j).getNgay())
+								&& ofs.get(i).getFood_by_day().getShifts().getId() == baoChenhLechs.get(j).getCa()
+								&& ofs.get(i).getFood_by_day().getCategory_food().getName()
+										.equals(baoChenhLechs.get(j).getTenmonan())) {
+							isExist = true;
+							position = j;
+							break;
+						}
+					}
+					if (isExist) {
+						baoChenhLechs.get(position)
+								.setSoluongchinhxac(baoChenhLechs.get(position).getSoluongchinhxac() + 1);
+					}
+
+					else {
+						BaoChenhLech temp = new BaoChenhLech();
+						temp.setNgay(DateUtil.DATE_WITHOUT_TIME(ofs.get(i).getOrder_food().getRegistration_date()));
+						temp.setCa(ofs.get(i).getFood_by_day().getShifts().getId());
+						temp.setTenmonan(ofs.get(i).getFood_by_day().getCategory_food().getName());
+						temp.setTenca(ofs.get(i).getFood_by_day().getShifts().getName());
+						temp.setIdmonan(ofs.get(i).getFood_by_day().getCategory_food().getId());
+						temp.setSoluongchinhxac(1);
+						baoChenhLechs.add(temp);
+					}
+				}
+			}
+
+			// de hien thi ngay cuoi cung hoac chon 1 ngay
+			toDate = DateUtil.addDays(toDate, 1);
+
+			// them mon tu chon vao list
+			for (Date date = fromDate; date.before(toDate); date = DateUtil.addDays(date, 1)) {
+				// tim so luong dki them
+				Date dateCurr = DateUtil.DATE_WITHOUT_TIME(date);
+				List<OrderAndFoodByDate> odfbds = ORDER_AND_FOOD_BY_DATE_SERVICE.find(dateCurr, ShiftsUtil.SHIFTS1_ID,
+						null);
+				List<ReportFoodByDay> reportFoods = REPORT_FOOD_BY_DAY_SERVICE.findByDate(dateCurr,
+						ShiftsUtil.SHIFTS1_ID);
+				// end
+				// vi su dung java.util.date se khong trung ngay lay duoi DB
+				// khong group duoc
+				BaoChenhLech montuchonCa1 = new BaoChenhLech();
+				montuchonCa1.setNgay(dateCurr);
+				montuchonCa1.setCa(ShiftsUtil.SHIFTS1_ID);
+				montuchonCa1.setTenmonan(ShiftsUtil.TEN_MON_TU_CHON);
+				montuchonCa1.setIdmonan(ShiftsUtil.ID_MON_TU_CHON);
+				montuchonCa1.setTenca(ShiftsUtil.SHIFTS1_NAME);
+				montuchonCa1.setSoluongchinhxac(0);
+				// tim so luong mon tu chon
+
+				// tim so luong dki them
+				List<ReportFoodByDay> reportFoods2 = REPORT_FOOD_BY_DAY_SERVICE.findByDate(dateCurr,
+						ShiftsUtil.SHIFTS2_ID);
+				// end
+				BaoChenhLech montuchonCa2 = new BaoChenhLech();
+				montuchonCa2.setNgay(dateCurr);
+				montuchonCa2.setCa(ShiftsUtil.SHIFTS2_ID);
+				montuchonCa2.setTenmonan(ShiftsUtil.TEN_MON_TU_CHON);
+				montuchonCa2.setIdmonan(ShiftsUtil.ID_MON_TU_CHON);
+				montuchonCa2.setTenca(ShiftsUtil.SHIFTS2_NAME);
+				montuchonCa2.setSoluongchinhxac(0);
+
+				// tim so luong dki them
+				List<ReportFoodByDay> reportFoods3 = REPORT_FOOD_BY_DAY_SERVICE.findByDate(dateCurr,
+						ShiftsUtil.SHIFTS3_ID);
+				BaoChenhLech montuchonCa3 = new BaoChenhLech();
+				montuchonCa3.setNgay(dateCurr);
+				montuchonCa3.setCa(ShiftsUtil.SHIFTS3_ID);
+				montuchonCa3.setTenmonan(ShiftsUtil.TEN_MON_TU_CHON);
+				montuchonCa3.setIdmonan(ShiftsUtil.ID_MON_TU_CHON);
+				montuchonCa3.setTenca(ShiftsUtil.SHIFTS3_NAME);
+				montuchonCa3.setSoluongchinhxac(0);
+
+				//
+				// tong so luong mon da dang ki
+				int tongsoluongdk1 = 0;
+				int tongsoluongdk2 = 0;
+				int tongsoluongdk3 = 0;
+				for (BaoChenhLech b : baoChenhLechs) {
+					if (!reportFoods.isEmpty()) {
+						if (b.getNgay().equals(reportFoods.get(0).getReport_date())) {
+							if (b.getCa() == ShiftsUtil.SHIFTS1_ID) {
+								tongsoluongdk1 = tongsoluongdk1 + b.getSoluongchinhxac();
+							}
+							if (b.getCa() == ShiftsUtil.SHIFTS2_ID) {
+								tongsoluongdk2 = tongsoluongdk2 + b.getSoluongchinhxac();
+							}
+							if (b.getCa() == ShiftsUtil.SHIFTS3_ID) {
+								tongsoluongdk3 = tongsoluongdk3 + b.getSoluongchinhxac();
+							}
+						}
+					}
+				}
+				if (!reportFoods.isEmpty()) {
+					montuchonCa1.setSoluongchinhxac(reportFoods.get(0).getQuantity() - tongsoluongdk1);
+				}
+				if (!reportFoods2.isEmpty()) {
+					montuchonCa2.setSoluongchinhxac(reportFoods2.get(0).getQuantity() - tongsoluongdk2);
+				}
+				if (!reportFoods3.isEmpty()) {
+					montuchonCa3.setSoluongchinhxac(reportFoods3.get(0).getQuantity() - tongsoluongdk3);
+				}
+				baoChenhLechs.add(montuchonCa1);
+				baoChenhLechs.add(montuchonCa2);
+				baoChenhLechs.add(montuchonCa3);
+			}
+			sortByDateAndFoodNameBaoChenhLech(baoChenhLechs);
+			// end test new
+
+			if (!baoChenhLechs.isEmpty()) {
+				// report
+				String reportPath = FacesContext.getCurrentInstance().getExternalContext()
+						.getRealPath("/resources/reports/dubaochitietsuatan.jasper");
+				JRDataSource beanDataSource = new JRBeanCollectionDataSource(baoChenhLechs);
+				Map<String, Object> importParam = new HashMap<String, Object>();
+				String image = FacesContext.getCurrentInstance().getExternalContext()
+						.getRealPath("/resources/gfx/lixco_logo.png");
+				importParam.put("logo", image);
+				JasperPrint jasperPrint = JasperFillManager.fillReport(reportPath, importParam, beanDataSource);
+				FacesContext facesContext = FacesContext.getCurrentInstance();
+				OutputStream outputStream;
+				outputStream = facesContext.getExternalContext().getResponseOutputStream();
+				JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+				facesContext.responseComplete();
+			} else {
+				Notification.NOTI_ERROR("Không có dữ liệu");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void baoCaoTongHopDuBaoSuatAnPDF() {
 		try {
 			// list de gan qua report
@@ -2436,5 +2635,29 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 
 	public void setDisable(boolean isDisable) {
 		this.isDisable = isDisable;
+	}
+
+	public Department getDepartmentSearch() {
+		return departmentSearch;
+	}
+
+	public void setDepartmentSearch(Department departmentSearch) {
+		this.departmentSearch = departmentSearch;
+	}
+
+	public List<Department> getDepartmentSearchs() {
+		return departmentSearchs;
+	}
+
+	public void setDepartmentSearchs(List<Department> departmentSearchs) {
+		this.departmentSearchs = departmentSearchs;
+	}
+
+	public List<Department> getDepartmentsSelected() {
+		return departmentsSelected;
+	}
+
+	public void setDepartmentsSelected(List<Department> departmentsSelected) {
+		this.departmentsSelected = departmentsSelected;
 	}
 }

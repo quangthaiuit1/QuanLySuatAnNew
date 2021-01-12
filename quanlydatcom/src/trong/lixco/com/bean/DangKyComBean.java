@@ -133,9 +133,18 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 	public void ajax_setDate() {
 		try {
 			if (week <= 53 && week > 0) {
-				LocalDate lc = new LocalDate();
-				startDate = lc.withWeekOfWeekyear(week).withYear(yearOfWeek).dayOfWeek().withMinimumValue().toDate();
-				endDate = lc.withWeekOfWeekyear(week).withYear(yearOfWeek).dayOfWeek().withMaximumValue().toDate();
+				if (week == 53) {
+					LocalDate lc = new LocalDate();
+					Date dateTemp = lc.withWeekOfWeekyear(52).withYear(yearOfWeek).dayOfWeek().withMaximumValue()
+							.toDate();
+					startDate = trong.lixco.com.bean.staticentity.DateUtil.addDays(dateTemp, 1);
+					endDate = trong.lixco.com.bean.staticentity.DateUtil.addDays(startDate, 6);
+				} else {
+					LocalDate lc = new LocalDate("2021-01-04");
+					startDate = lc.withWeekOfWeekyear(week).withYear(yearOfWeek).dayOfWeek().withMinimumValue()
+							.toDate();
+					endDate = lc.withWeekOfWeekyear(week).withYear(yearOfWeek).dayOfWeek().withMaximumValue().toDate();
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -185,8 +194,6 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 			}
 		} catch (Exception e) {
 		}
-
-		LocalDate lc = new LocalDate();
 	}
 
 	// show report mon an tu ngay den ngay
