@@ -11,6 +11,15 @@ public class TimeBound extends AbstractEntity {
 	// de them duoc so 0 dang truoc
 	private String minutes;
 	private String description;
+	private boolean is_allow_register_current = false;
+
+	public boolean isIs_allow_register_current() {
+		return is_allow_register_current;
+	}
+
+	public void setIs_allow_register_current(boolean is_allow_register_current) {
+		this.is_allow_register_current = is_allow_register_current;
+	}
 
 	public String getDescription() {
 		return description;

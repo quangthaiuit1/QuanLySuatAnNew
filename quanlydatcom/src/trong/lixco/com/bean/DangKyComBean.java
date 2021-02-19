@@ -426,6 +426,11 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		// neu la ngay hien tai
 		if (sdf.format(dateCurrent).equals(sdf.format(dateCheck))) {
+			// query gio duoi DB
+			TimeBound timeDKSA = TIME_BOUND_SERVICE.find("CURRENTDATE");
+			if (timeDKSA.isIs_allow_register_current()) {
+				return false;
+			}
 			return true;
 		}
 		// 3h ngay hom truoc
@@ -440,8 +445,15 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 
 	// ktra het han chua
 	public boolean isExpired(FoodByDay dateCheck) {
-		Date dateCurrent = new Date();
-		return dateCheck.getFood_date().before(dateCurrent);
+		// Date dateCurrent = new Date();
+		// chuyen ve ngay khong co gio
+		Date dateCurrent = trong.lixco.com.bean.staticentity.DateUtil.DATE_WITHOUT_TIME(new Date());
+		Date dateCheckWithoutTime = trong.lixco.com.bean.staticentity.DateUtil
+				.DATE_WITHOUT_TIME(dateCheck.getFood_date());
+		if (dateCheckWithoutTime.equals(dateCurrent)) {
+			return false;
+		}
+		return dateCheckWithoutTime.before(dateCurrent);
 	}
 
 	// Cap nhat food theo ca cho user

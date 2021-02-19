@@ -64,7 +64,7 @@ public class TimekeepingDataService {
 	}
 
 	private static String process(String link) throws Exception {
-		URL url = new URL("http://192.168.0.5:9290" + "/chamcong/api/" + NAME + link);
+		URL url = new URL("http://192.168.0.5:9280" + "/chamcong/api/" + NAME + link);
 		// URL url = new URL("http://192.168.0.203:8280" + "/chamcong/api/" +
 		// NAME + link);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
