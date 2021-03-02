@@ -54,6 +54,7 @@ import trong.lixco.com.bean.staticentity.MessageView;
 import trong.lixco.com.bean.staticentity.Notification;
 import trong.lixco.com.bean.staticentity.ShiftsUtil;
 import trong.lixco.com.ejb.service.FoodCustomerService;
+import trong.lixco.com.ejb.service.FoodDayByDayService;
 import trong.lixco.com.ejb.service.FoodNhaAnService;
 import trong.lixco.com.ejb.service.FoodOverTimeService;
 import trong.lixco.com.ejb.service.OrderAndFoodByDateService;
@@ -61,6 +62,7 @@ import trong.lixco.com.ejb.service.OrderFoodService;
 import trong.lixco.com.ejb.service.QuantityFoodService;
 import trong.lixco.com.ejb.service.ReportFoodByDayService;
 import trong.lixco.com.ejb.service.ShiftsService;
+import trong.lixco.com.jpa.entity.FoodByDay;
 import trong.lixco.com.jpa.entity.FoodCustomer;
 import trong.lixco.com.jpa.entity.FoodNhaAn;
 import trong.lixco.com.jpa.entity.FoodOverTime;
@@ -140,7 +142,8 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 	private FoodCustomerService FOOD_CUSTOMER_SERVICE;
 	@Inject
 	private FoodOverTimeService FOOD_OVER_TIME_SERVICE;
-
+	@Inject
+	private FoodDayByDayService FOOD_BY_DAY_SERVICE;
 	EmployeeServicePublic EMPLOYEE_SERVICE_PUBLIC;
 	DepartmentServicePublic DEPARTMENT_SERVICE_PUBLIC;
 
@@ -173,7 +176,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 			toDateAte = currentDate00;
 
 			dateSearchExactly = currentDate00;
-			checkedRenderView = new boolean[13];
+			checkedRenderView = new boolean[14];
 			for (int i = 0; i < checkedRenderView.length; i++) {
 				checkedRenderView[i] = false;
 			}
@@ -204,7 +207,7 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 		}
 		if (valueChecked != 0) {
 			// thay i < tai day
-			for (int i = 1; i < 12; i++) {
+			for (int i = 1; i < 13; i++) {
 				if (valueChecked == i) {
 					checkedRenderView[i - 1] = true;
 				} else {
@@ -1831,6 +1834,409 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 				facesContext.responseComplete();
 			} else {
 				Notification.NOTI_ERROR("Không có dữ liệu");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void baoCaoChiTietDangKySuatAnTheoPhong() {
+		try {
+			// xu ly cho chon don vi de xuat pdf
+			// list de gan qua report
+			List<String> depCodes = new ArrayList<>();
+			for (Department d : departmentsSelected) {
+				depCodes.add(d.getCode());
+			}
+			// tim ds nhan vien
+			StringBuilder builder = new StringBuilder();
+			for (String d : depCodes) {
+				builder.append(d);
+				builder.append(",");
+			}
+			String s = "";
+			if (builder.toString().endsWith(",")) {
+				s = builder.toString().substring(0, builder.toString().length() - 1);
+			}
+			EmployeeData[] emplsByDep = EmployeeDataService.timtheodsphongban(s);
+			// System.out.println(emplsByDep);
+			if (emplsByDep != null) {
+				XSSFWorkbook workbook = new XSSFWorkbook();
+				// de hien thi ngay cuoi cung hoac chon 1 ngay
+				toDate = DateUtil.addDays(toDate, 1);
+				// them mon tu chon vao list
+				for (Date date = fromDate; date.before(toDate); date = DateUtil.addDays(date, 1)) {
+					String nameSheet = "";
+					Date dateSearchWithoutTime = DateUtil.DATE_WITHOUT_TIME(date);
+					nameSheet = "Ca1-" + formatter.format(date);
+					// kiem tra nhan vien co dang ky com chua
+					List<FoodByDay> fByDaysShift1 = FOOD_BY_DAY_SERVICE.findByDate(dateSearchWithoutTime, shifts1);
+
+					XSSFSheet sheet = null;
+					sheet = workbook.createSheet(nameSheet);
+					int rownum = 0;
+					Cell cell;
+					Row row;
+					XSSFCellStyle style = createStyleForTitle(workbook);
+					style.setAlignment(CellStyle.ALIGN_CENTER);
+
+					// cell style for date
+					XSSFCellStyle cellStyleDate = workbook.createCellStyle();
+					CreationHelper createHelper = workbook.getCreationHelper();
+					cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+
+					row = sheet.createRow(rownum);
+
+					// EmpNo
+					cell = row.createCell(0);
+					cell.setCellValue("Mã NV");
+					cell.setCellStyle(style);
+					// xep loai// EmpName
+					cell = row.createCell(1);
+					cell.setCellValue("Tên NV");
+					cell.setCellStyle(style);
+					// Salary
+					cell = row.createCell(2);
+					cell.setCellValue("Phòng ban");
+					cell.setCellStyle(style);
+
+					cell = row.createCell(3);
+					cell.setCellValue("Ngày");
+					cell.setCellStyle(style);
+
+					cell = row.createCell(4);
+					cell.setCellValue("Ca làm việc");
+					cell.setCellStyle(style);
+
+					cell = row.createCell(5);
+					cell.setCellValue("Tự chọn");
+					cell.setCellStyle(style);
+
+					for (int i = 0; i < fByDaysShift1.size(); i++) {
+						cell = row.createCell(5 + i + 1);
+						cell.setCellValue(fByDaysShift1.get(i).getCategory_food().getName());
+						cell.setCellStyle(style);
+					}
+
+					// Data
+					for (EmployeeData f : emplsByDep) {
+						// Gson gson = new Gson();
+						rownum++;
+						row = sheet.createRow(rownum);
+
+						// ma nhan vien
+						cell = row.createCell(0);
+						cell.setCellValue(f.getCode());
+						// ten nhan vien
+						cell = row.createCell(1);
+						cell.setCellValue(f.getName());
+
+						// ten phong ban
+						cell = row.createCell(2);
+						DepartmentData departmentTemp = DepartmentDataService.timtheoma(f.getCodeDepart());
+						// kiem tra phong ban cap may
+						// phong cap 2
+						if (departmentTemp.getLevel() == 2) {
+							cell.setCellValue(departmentTemp.getName());
+						}
+						if (departmentTemp.getLevel() == 3) {
+							DepartmentData departmentLevel2 = DepartmentDataService
+									.timtheoma(departmentTemp.getCodeDepart());
+							if (departmentLevel2 != null) {
+								if (departmentLevel2.getCode().equals("30005")) {
+									cell.setCellValue(departmentTemp.getName());
+								} else {
+									cell.setCellValue(departmentLevel2.getName());
+								}
+							}
+						}
+						// ngay
+						cell = row.createCell(3);
+						cell.setCellValue(dateSearchWithoutTime);
+						cell.setCellStyle(cellStyleDate);
+						// ca lam viec
+						cell = row.createCell(4);
+						cell.setCellValue(shifts1);
+
+						// tim thu nguoi do dk mon an gi or tu chon
+						List<OrderAndFoodByDate> oCheck = ORDER_AND_FOOD_BY_DATE_SERVICE.find(dateSearchWithoutTime,
+								shifts1, f.getCode());
+						// khong dang ky
+						if (oCheck.isEmpty()) {
+							cell = row.createCell(5);
+							cell.setCellValue(true);
+							for (int i = 0; i < fByDaysShift1.size(); i++) {
+								cell = row.createCell(5 + i + 1);
+								cell.setCellValue(false);
+							}
+						} else {
+							cell = row.createCell(5);
+							cell.setCellValue(false);
+							for (int i = 0; i < fByDaysShift1.size(); i++) {
+								cell = row.createCell(5 + i + 1);
+								if (fByDaysShift1.get(i).getCategory_food()
+										.equals(oCheck.get(0).getFood_by_day().getCategory_food())) {
+									cell.setCellValue(true);
+								} else {
+									cell.setCellValue(false);
+								}
+							}
+						}
+					}
+
+					// CA 2
+					String nameSheet2 = "";
+					nameSheet2 = "Ca2-" + formatter.format(date);
+					// kiem tra nhan vien co dang ky com chua
+					List<FoodByDay> fByDaysShift2 = FOOD_BY_DAY_SERVICE.findByDate(dateSearchWithoutTime, shifts2);
+					if (!fByDaysShift2.isEmpty()) {
+						XSSFSheet sheet2 = null;
+						sheet2 = workbook.createSheet(nameSheet2);
+						int rownum2 = 0;
+						Cell cell2;
+						Row row2;
+						XSSFCellStyle style2 = createStyleForTitle(workbook);
+						style2.setAlignment(CellStyle.ALIGN_CENTER);
+
+						// cell style for date
+						XSSFCellStyle cellStyleDate2 = workbook.createCellStyle();
+						CreationHelper createHelper2 = workbook.getCreationHelper();
+						cellStyleDate2.setDataFormat(createHelper2.createDataFormat().getFormat("dd-MM-yyyy"));
+
+						row2 = sheet2.createRow(rownum2);
+
+						// EmpNo
+						cell2 = row2.createCell(0);
+						cell2.setCellValue("Mã NV");
+						cell2.setCellStyle(style2);
+						// xep loai// EmpName
+						cell2 = row2.createCell(1);
+						cell2.setCellValue("Tên NV");
+						cell2.setCellStyle(style2);
+						// Salary
+						cell2 = row2.createCell(2);
+						cell2.setCellValue("Phòng ban");
+						cell2.setCellStyle(style2);
+
+						cell2 = row2.createCell(3);
+						cell2.setCellValue("Ngày");
+						cell2.setCellStyle(style2);
+
+						cell2 = row2.createCell(4);
+						cell2.setCellValue("Ca làm việc");
+						cell2.setCellStyle(style2);
+
+						cell2 = row2.createCell(5);
+						cell2.setCellValue("Tự chọn");
+						cell2.setCellStyle(style2);
+
+						for (int i = 0; i < fByDaysShift2.size(); i++) {
+							cell2 = row2.createCell(5 + i + 1);
+							cell2.setCellValue(fByDaysShift2.get(i).getCategory_food().getName());
+							cell2.setCellStyle(style2);
+						}
+
+						// Data
+						for (EmployeeData f : emplsByDep) {
+							if (f.isWorkShift()) {
+
+								// Gson gson = new Gson();
+								rownum2++;
+								row2 = sheet2.createRow(rownum2);
+
+								// ma nhan vien
+								cell2 = row2.createCell(0);
+								cell2.setCellValue(f.getCode());
+								// ten nhan vien
+								cell2 = row2.createCell(1);
+								cell2.setCellValue(f.getName());
+
+								// ten phong ban
+								cell2 = row2.createCell(2);
+								DepartmentData departmentTemp = DepartmentDataService.timtheoma(f.getCodeDepart());
+								// kiem tra phong ban cap may
+								// phong cap 2
+								if (departmentTemp.getLevel() == 2) {
+									cell2.setCellValue(departmentTemp.getName());
+								}
+								if (departmentTemp.getLevel() == 3) {
+									DepartmentData departmentLevel2 = DepartmentDataService
+											.timtheoma(departmentTemp.getCodeDepart());
+									if (departmentLevel2 != null) {
+										if (departmentLevel2.getCode().equals("30005")) {
+											cell2.setCellValue(departmentTemp.getName());
+										} else {
+											cell2.setCellValue(departmentLevel2.getName());
+										}
+									}
+								}
+								// ngay
+								cell2 = row2.createCell(3);
+								cell2.setCellValue(dateSearchWithoutTime);
+								cell2.setCellStyle(cellStyleDate2);
+								// ca lam viec
+								cell2 = row2.createCell(4);
+								cell2.setCellValue(shifts2);
+
+								// tim thu nguoi do dk mon an gi or tu chon
+								List<OrderAndFoodByDate> oCheck2 = ORDER_AND_FOOD_BY_DATE_SERVICE
+										.find(dateSearchWithoutTime, shifts2, f.getCode());
+								// khong dang ky
+								if (oCheck2.isEmpty()) {
+									cell2 = row2.createCell(5);
+									cell2.setCellValue(true);
+									for (int i = 0; i < fByDaysShift2.size(); i++) {
+										cell2 = row2.createCell(5 + i + 1);
+										cell2.setCellValue(false);
+									}
+								} else {
+									cell2 = row2.createCell(5);
+									cell2.setCellValue(false);
+									for (int i = 0; i < fByDaysShift2.size(); i++) {
+										cell2 = row2.createCell(5 + i + 1);
+										if (fByDaysShift2.get(i).getCategory_food()
+												.equals(oCheck2.get(0).getFood_by_day().getCategory_food())) {
+											cell2.setCellValue(true);
+										} else {
+											cell2.setCellValue(false);
+										}
+									}
+								}
+							}
+						}
+					}
+
+					// ca 3
+					String nameSheet3 = "";
+					nameSheet3 = "Ca3-" + formatter.format(date);
+					// kiem tra nhan vien co dang ky com chua
+					List<FoodByDay> fByDaysShift3 = FOOD_BY_DAY_SERVICE.findByDate(dateSearchWithoutTime, shifts3);
+					// neu khong co mon an ca 3
+					if (!fByDaysShift3.isEmpty()) {
+						XSSFSheet sheet3 = null;
+						sheet3 = workbook.createSheet(nameSheet3);
+						int rownum3 = 0;
+						Cell cell3;
+						Row row3;
+						XSSFCellStyle style3 = createStyleForTitle(workbook);
+						style3.setAlignment(CellStyle.ALIGN_CENTER);
+
+						// cell style for date
+						XSSFCellStyle cellStyleDate3 = workbook.createCellStyle();
+						CreationHelper createHelper3 = workbook.getCreationHelper();
+						cellStyleDate3.setDataFormat(createHelper3.createDataFormat().getFormat("dd-MM-yyyy"));
+
+						row3 = sheet3.createRow(rownum3);
+
+						// EmpNo
+						cell3 = row3.createCell(0);
+						cell3.setCellValue("Mã NV");
+						cell3.setCellStyle(style3);
+						// xep loai// EmpName
+						cell3 = row3.createCell(1);
+						cell3.setCellValue("Tên NV");
+						cell3.setCellStyle(style3);
+						// Salary
+						cell3 = row3.createCell(2);
+						cell3.setCellValue("Phòng ban");
+						cell3.setCellStyle(style3);
+
+						cell3 = row3.createCell(3);
+						cell3.setCellValue("Ngày");
+						cell3.setCellStyle(style3);
+
+						cell3 = row3.createCell(4);
+						cell3.setCellValue("Ca làm việc");
+						cell3.setCellStyle(style3);
+
+						cell3 = row3.createCell(5);
+						cell3.setCellValue("Tự chọn");
+						cell3.setCellStyle(style3);
+
+						for (int i = 0; i < fByDaysShift3.size(); i++) {
+							cell3 = row3.createCell(5 + i + 1);
+							cell3.setCellValue(fByDaysShift3.get(i).getCategory_food().getName());
+							cell3.setCellStyle(style3);
+						}
+
+						// Data
+						for (EmployeeData f : emplsByDep) {
+							if (f.isWorkShift()) {
+
+								// Gson gson = new Gson();
+								rownum3++;
+								row3 = sheet3.createRow(rownum3);
+
+								// ma nhan vien
+								cell3 = row3.createCell(0);
+								cell3.setCellValue(f.getCode());
+								// ten nhan vien
+								cell3 = row3.createCell(1);
+								cell3.setCellValue(f.getName());
+
+								// ten phong ban
+								cell3 = row3.createCell(2);
+								DepartmentData departmentTemp = DepartmentDataService.timtheoma(f.getCodeDepart());
+								// kiem tra phong ban cap may
+								// phong cap 2
+								if (departmentTemp.getLevel() == 2) {
+									cell3.setCellValue(departmentTemp.getName());
+								}
+								if (departmentTemp.getLevel() == 3) {
+									DepartmentData departmentLevel2 = DepartmentDataService
+											.timtheoma(departmentTemp.getCodeDepart());
+									if (departmentLevel2 != null) {
+										if (departmentLevel2.getCode().equals("30005")) {
+											cell3.setCellValue(departmentTemp.getName());
+										} else {
+											cell3.setCellValue(departmentLevel2.getName());
+										}
+									}
+								}
+								// ngay
+								cell3 = row3.createCell(3);
+								cell3.setCellValue(dateSearchWithoutTime);
+								cell3.setCellStyle(cellStyleDate3);
+								// ca lam viec
+								cell3 = row3.createCell(4);
+								cell3.setCellValue(shifts3);
+
+								// tim thu nguoi do dk mon an gi or tu chon
+								List<OrderAndFoodByDate> oCheck3 = ORDER_AND_FOOD_BY_DATE_SERVICE
+										.find(dateSearchWithoutTime, shifts3, f.getCode());
+								// khong dang ky
+								if (oCheck3.isEmpty()) {
+									cell3 = row3.createCell(5);
+									cell3.setCellValue(true);
+									for (int i = 0; i < fByDaysShift3.size(); i++) {
+										cell3 = row3.createCell(5 + i + 1);
+										cell3.setCellValue(false);
+									}
+								} else {
+									cell3 = row3.createCell(5);
+									cell3.setCellValue(false);
+									for (int i = 0; i < fByDaysShift3.size(); i++) {
+										cell3 = row3.createCell(5 + i + 1);
+										if (fByDaysShift3.get(i).getCategory_food()
+												.equals(oCheck3.get(0).getFood_by_day().getCategory_food())) {
+											cell3.setCellValue(true);
+										} else {
+											cell3.setCellValue(false);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				String filename = "DSKhongDK.xlsx";
+				FacesContext facesContext = FacesContext.getCurrentInstance();
+				ExternalContext externalContext = facesContext.getExternalContext();
+				externalContext.setResponseContentType("application/vnd.ms-excel");
+				externalContext.setResponseHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+				workbook.write(externalContext.getResponseOutputStream());
+				facesContext.responseComplete();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

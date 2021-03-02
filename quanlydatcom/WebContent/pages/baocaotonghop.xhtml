@@ -94,9 +94,76 @@
 						<f:selectItem
 							itemLabel="BC chi tiết dự báo suất ăn mới (theo Phòng ban)"
 							itemValue="11" />
+						<f:selectItem
+							itemLabel="BC chi tiết đăng ký suất ăn (theo Phòng ban)"
+							itemValue="12" />
 						<p:ajax listener="#{baoCaoBean.handleRenderView()}"
 							process="@this" />
 					</p:selectOneMenu>
+				</div>
+			</p:fieldset>
+			<p:fieldset rendered="#{baoCaoBean.checkedRenderView[11]}">
+				<div class="ui-g" style="width: 100%">
+					<h3>Chi tiết đăng ký suất ăn (Phân theo Phòng ban)</h3>
+				</div>
+				<div class="ui-g">
+					<p:separator style="width:100%;float:left" />
+				</div>
+				<div class="ui-g-12">
+					<div class="ui-g-3"></div>
+					<div class="ui-g-6">
+						<p:dataTable value="#{baoCaoBean.departmentSearchs}"
+							selection="#{baoCaoBean.departmentsSelected}" var="item"
+							scrollable="true" scrollHeight="200" styleClass="tableformat"
+							paginatorPosition="bottom" rowsPerPageTemplate="60,80,100"
+							paginator="true" rows="80" rowKey="#{item.code}"
+							rowIndexVar="rowIndex" resizableColumns="true">
+							<p:column selectionMode="multiple"
+								style="text-align:center" width="30"/>
+							<p:column headerText="Mã" style="text-align:center" width="50">
+								<h:outputText value="#{item.code}" />
+							</p:column>
+							<p:column headerText="Tên phòng ban" filterBy="#{item.name}"
+								filterFunction="#{abstractCustomFilter.filterByText}"
+								style="text-align:left">
+								<h:outputText value="#{item.name}" />
+							</p:column>
+						</p:dataTable>
+					</div>
+					<div class="ui-g-3"></div>
+				</div>
+				<div class="ui-g-12">
+					<div class="ui-g-3"></div>
+					<div class="ui-g-6">
+						<div class="ui-g-4">
+							<p:fieldset id="fieldsetFromDate2" legend="Từ ngày:"
+								styleClass="noneformatfs">
+								<p:calendar styleClass="stwidth" locale="vi"
+									value="#{baoCaoBean.fromDate}" id="dateSearchFromDate2"
+									pattern="#{applicationBean.cf.formatDate}"
+									showButtonPanel="true" navigator="true"
+									mask="#{applicationBean.cf.maskDate}" />
+							</p:fieldset>
+						</div>
+						<div class="ui-g-4">
+							<p:fieldset id="fieldsetToDate2" legend="Đến ngày:"
+								styleClass="noneformatfs">
+								<p:calendar styleClass="stwidth" locale="vi"
+									value="#{baoCaoBean.toDate}" id="dateSearchToDate2"
+									pattern="#{applicationBean.cf.formatDate}"
+									showButtonPanel="true" navigator="true"
+									mask="#{applicationBean.cf.maskDate}" />
+							</p:fieldset>
+						</div>
+						<div class="ui-g-4">
+							<p:commandButton style="float:right;margin-top:22px"
+								process="formBaoCao" styleClass="btsearch" type="submit"
+								value="Xuất PDF" ajax="false"
+								actionListener="#{baoCaoBean.baoCaoChiTietDangKySuatAnTheoPhong()}"
+								onclick="this.form.target='_blank'" />
+						</div>
+					</div>
+					<div class="ui-g-3"></div>
 				</div>
 			</p:fieldset>
 			<p:fieldset rendered="#{baoCaoBean.checkedRenderView[0]}">
@@ -715,6 +782,7 @@
 				</div>
 			</p:fieldset>
 			<!-- END  -->
+
 			<p:dialog widgetVar="progressLoader" id="divProgress" modal="true"
 				draggable="false" resizable="false" showHeader="false">
 				<p:graphicImage library="gfx" name="icon-loading.gif" />
