@@ -53,10 +53,12 @@ import trong.lixco.com.bean.staticentity.DateUtil;
 import trong.lixco.com.bean.staticentity.MessageView;
 import trong.lixco.com.bean.staticentity.Notification;
 import trong.lixco.com.bean.staticentity.ShiftsUtil;
+import trong.lixco.com.bean.staticentity.StaticURL;
 import trong.lixco.com.ejb.service.FoodCustomerService;
 import trong.lixco.com.ejb.service.FoodDayByDayService;
 import trong.lixco.com.ejb.service.FoodNhaAnService;
 import trong.lixco.com.ejb.service.FoodOverTimeService;
+import trong.lixco.com.ejb.service.LinkService;
 import trong.lixco.com.ejb.service.OrderAndFoodByDateService;
 import trong.lixco.com.ejb.service.OrderFoodService;
 import trong.lixco.com.ejb.service.QuantityFoodService;
@@ -66,6 +68,7 @@ import trong.lixco.com.jpa.entity.FoodByDay;
 import trong.lixco.com.jpa.entity.FoodCustomer;
 import trong.lixco.com.jpa.entity.FoodNhaAn;
 import trong.lixco.com.jpa.entity.FoodOverTime;
+import trong.lixco.com.jpa.entity.Link;
 import trong.lixco.com.jpa.entity.OrderAndFoodByDate;
 import trong.lixco.com.jpa.entity.OrderFood;
 import trong.lixco.com.jpa.entity.QuantityFood;
@@ -144,6 +147,8 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 	private FoodOverTimeService FOOD_OVER_TIME_SERVICE;
 	@Inject
 	private FoodDayByDayService FOOD_BY_DAY_SERVICE;
+	@Inject
+	private LinkService LINK_SERVICE;
 	EmployeeServicePublic EMPLOYEE_SERVICE_PUBLIC;
 	DepartmentServicePublic DEPARTMENT_SERVICE_PUBLIC;
 
@@ -194,6 +199,11 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 			if (departmentSearchs.size() != 0) {
 				departmentSearchs = DepartmentUtil.sort(departmentSearchs);
 				departmentSearch = departmentSearchs.get(0);
+			}
+			// kiem tra thu co link Cham Cong chua
+			if (StaticURL.URL_CHAMCONG.equals("")) {
+				Link urlChamCong = LINK_SERVICE.find("ChamCong");
+				StaticURL.URL_CHAMCONG = urlChamCong.getLink_jdbc();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

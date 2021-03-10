@@ -9,6 +9,8 @@ import java.util.Date;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import trong.lixco.com.bean.staticentity.StaticURL;
+
 public class TimekeepingDataService {
 	public static final String NAME = "timekeeping";
 	static Gson gson;
@@ -32,7 +34,7 @@ public class TimekeepingDataService {
 		try {
 
 			String link = "?cm=findByTimeKp&dt=" + param;
-			String data = process(link);
+			String data = process(link, StaticURL.URL_CHAMCONG);
 			DataResponseAPI ketqua = gson.fromJson(data, DataResponseAPI.class);
 			TimekeepingData[] employeeData = gson.fromJson(ketqua.getDt(), TimekeepingData[].class);
 			return employeeData;
@@ -52,7 +54,7 @@ public class TimekeepingDataService {
 			if (ca.equals("CD")) {
 				link = "?cm=findByTimeKpWorkShifCD&dt=" + strDate;
 			}
-			String data = process(link);
+			String data = process(link, StaticURL.URL_CHAMCONG);
 			DataResponseAPI ketqua = gson.fromJson(data, DataResponseAPI.class);
 			TimekeepingData[] employeeData = gson.fromJson(ketqua.getDt(), TimekeepingData[].class);
 			return employeeData;
@@ -63,8 +65,9 @@ public class TimekeepingDataService {
 
 	}
 
-	private static String process(String link) throws Exception {
-		URL url = new URL("http://192.168.0.5:9290" + "/chamcong/api/" + NAME + link);
+	private static String process(String link, String linkChamCong) throws Exception {
+		String urlTemp = linkChamCong + "/chamcong/api/" + NAME + link;
+		URL url = new URL(urlTemp);
 		// URL url = new URL("http://192.168.0.203:8280" + "/chamcong/api/" +
 		// NAME + link);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
