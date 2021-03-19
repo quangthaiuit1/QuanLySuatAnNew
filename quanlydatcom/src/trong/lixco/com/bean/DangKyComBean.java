@@ -34,11 +34,13 @@ import trong.lixco.com.account.servicepublics.MemberServicePublicProxy;
 import trong.lixco.com.bean.staticentity.MessageView;
 import trong.lixco.com.bean.staticentity.Notification;
 import trong.lixco.com.bean.staticentity.ShiftsUtil;
+import trong.lixco.com.ejb.service.DepartmentExceptionService;
 import trong.lixco.com.ejb.service.FoodDayByDayService;
 import trong.lixco.com.ejb.service.OrderAndFoodByDateService;
 import trong.lixco.com.ejb.service.OrderFoodService;
 import trong.lixco.com.ejb.service.ShiftsService;
 import trong.lixco.com.ejb.service.TimeBoundService;
+import trong.lixco.com.jpa.entity.DepartException;
 import trong.lixco.com.jpa.entity.FoodByDay;
 import trong.lixco.com.jpa.entity.OrderAndFoodByDate;
 import trong.lixco.com.jpa.entity.OrderFood;
@@ -118,6 +120,9 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 
 	@EJB
 	private TimeBoundService TIME_BOUND_SERVICE;
+
+	@EJB
+	private DepartmentExceptionService DEPARTMENT_EXCEPTION_SERVICE;
 
 	EmployeeServicePublic EMPLOYEE_SERVICE_PUBLIC;
 
@@ -306,22 +311,66 @@ public class DangKyComBean extends AbstractBean<OrderFood> {
 			// kiem tra co phai nhan vien di ca hay khong
 			EmployeeDTO employee = EMPLOYEE_SERVICE_PUBLIC.findByCode(member.getCode());
 			// xac dinh di ca or khong di ca
-			if (!employee.isWorkShift()) {
+			// if (!employee.isWorkShift()) {
+			// if (shiftsSelected.getId() == ShiftsUtil.SHIFTS3_ID
+			// || shiftsSelected.getId() == ShiftsUtil.SHIFTS2_ID) {
+			// PrimeFaces current = PrimeFaces.current();
+			// current.executeScript("PF('wdvDialogChooseFood').hide();");
+			// MessageView.ERROR("Không được đăng ký");
+			// return;
+			// }
+			// }
+
+			// handle cho BINH DUONG
+			// tim danh sach phong ban duoc dang ky
+			List<DepartException> depsEx = DEPARTMENT_EXCEPTION_SERVICE.findAll();
+			if (depsEx == null || depsEx.isEmpty()) {
+				depsEx = new ArrayList<>();
+			}
+			if (employee.isWorkShift()) {
+				java.sql.Date date = new java.sql.Date(orderfoodSelected.getRegistration_date().getTime());
+				List<OrderAndFoodByDate> orderAndFoods = ORDER_AND_FOOD_BY_DATE_SERVICE.find(date,
+						shiftsSelected.getId(), member.getCode());
+				if (!orderAndFoods.isEmpty()) {
+					food1Selected = orderAndFoods.get(0).getFood_by_day();
+				}
+				showListFoodShift(shiftsSelected.getId());
+			} else {
 				if (shiftsSelected.getId() == ShiftsUtil.SHIFTS3_ID
 						|| shiftsSelected.getId() == ShiftsUtil.SHIFTS2_ID) {
-					PrimeFaces current = PrimeFaces.current();
-					current.executeScript("PF('wdvDialogChooseFood').hide();");
-					MessageView.ERROR("Không được đăng ký");
-					return;
+					boolean duocDangKy = false;
+					for (DepartException d : depsEx) {
+						if (employee.getCodeDepart().equals(d.getCode())) {
+							java.sql.Date date = new java.sql.Date(orderfoodSelected.getRegistration_date().getTime());
+							List<OrderAndFoodByDate> orderAndFoods = ORDER_AND_FOOD_BY_DATE_SERVICE.find(date,
+									shiftsSelected.getId(), member.getCode());
+							if (!orderAndFoods.isEmpty()) {
+								food1Selected = orderAndFoods.get(0).getFood_by_day();
+							}
+							showListFoodShift(shiftsSelected.getId());
+							duocDangKy = true;
+							break;
+						}
+					}
+					if (!duocDangKy) {
+						PrimeFaces current = PrimeFaces.current();
+						current.executeScript("PF('wdvDialogChooseFood').hide();");
+						MessageView.ERROR("Không được đăng ký");
+					}
 				}
 			}
-			java.sql.Date date = new java.sql.Date(orderfoodSelected.getRegistration_date().getTime());
-			List<OrderAndFoodByDate> orderAndFoods = ORDER_AND_FOOD_BY_DATE_SERVICE.find(date, shiftsSelected.getId(),
-					member.getCode());
-			if (!orderAndFoods.isEmpty()) {
-				food1Selected = orderAndFoods.get(0).getFood_by_day();
-			}
-			showListFoodShift(shiftsSelected.getId());
+
+			// end BINH DUONG
+
+			// java.sql.Date date = new
+			// java.sql.Date(orderfoodSelected.getRegistration_date().getTime());
+			// List<OrderAndFoodByDate> orderAndFoods =
+			// ORDER_AND_FOOD_BY_DATE_SERVICE.find(date, shiftsSelected.getId(),
+			// member.getCode());
+			// if (!orderAndFoods.isEmpty()) {
+			// food1Selected = orderAndFoods.get(0).getFood_by_day();
+			// }
+			// showListFoodShift(shiftsSelected.getId());
 		} catch (Exception e) {
 		}
 	}

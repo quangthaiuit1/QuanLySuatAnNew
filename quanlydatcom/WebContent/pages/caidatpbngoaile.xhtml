@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:h="http://java.sun.com/jsf/html" template="/pages/home.xhtml">
+
+	<ui:define name="content">
+		<style>
+.sldapan label {
+	width: 90%;
+	margin-right: 0px !important;
+}
+
+.sldapan {
+	width: 100%;
+	margin: 0px;
+}
+
+.sldapan td {
+	padding: 0px;
+	text-align: left;
+}
+
+.lnumber {
+	background: #009688;
+	padding: 5px 10px;
+	color: white;
+	border-radius: 30px;
+	margin-right: 10px;
+}
+
+.lcauhoi {
+	font-size: 1.2em !important;
+	font-weight: bold;
+	color: #009688;
+}
+
+.diemdanhgia {
+	font-size: 1.1em !important;
+	text-decoration: underline !important;
+	color: #0e8bee !important;
+}
+
+.animated .ui-progressbar-value {
+	background-image: url("#{resource['images/pbar-ani.gif']}");
+}
+</style>
+		<script type="text/javascript">
+    //<![CDATA[
+		 function showProgress() {
+			 console.log("Hello world!");
+	         PF('progressLoader').show();
+	       }
+	       function hideProgress() {
+	    	   console.log("End Hello world!");
+	         PF('progressLoader').hide();
+	       }
+    //]]>
+	</script>
+		<p:growl id="growlDanhMuc" showDetail="true" sticky="false" />
+		<h:form id="detail">
+
+			<p:fieldset style="margin-top: 10px;">
+				<div class="ui-g" style="width: 100%">
+					<h3>Cài đặt phòng ban ngoại lệ</h3>
+				</div>
+				<div class="ui-g">
+					<p:separator style="width:100%;float:left" />
+				</div>
+				<div class="ui-g-12">
+					<div class="ui-g-3"></div>
+					<div class="ui-g-6">
+						<p:dataTable value="#{caiDatPBNgoaiLeBean.departmentSearchs}"
+							var="item" scrollable="true" scrollHeight="200"
+							styleClass="tableformat" paginatorPosition="bottom"
+							rowsPerPageTemplate="60,80,100" paginator="true" rows="80"
+							rowKey="#{item.code}" rowIndexVar="rowIndex"
+							resizableColumns="true" id="dtTableDepart">
+							<f:facet name="header">
+								<p:commandButton style="margin-left: 75%;width:140px"
+									styleClass="btnWarning" type="submit" value="Lưu/cập nhật"
+									process="@form" update="detail:dtTableDepart,growlDanhMuc"
+									actionListener="#{caiDatPBNgoaiLeBean.saveOrUpdate()}"
+									icon="fa fa-save" />
+							</f:facet>
+							<p:column headerText="..." style="text-align:center" width="30">
+								<p:selectBooleanCheckbox value="#{item.select}">
+									<p:ajax process="@this" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column headerText="Mã" style="text-align:center" width="50">
+								<h:outputText value="#{item.code}" />
+							</p:column>
+							<p:column headerText="Tên phòng ban" filterBy="#{item.name}"
+								filterFunction="#{abstractCustomFilter.filterByText}"
+								style="text-align:left">
+								<h:outputText value="#{item.name}" />
+							</p:column>
+						</p:dataTable>
+					</div>
+					<div class="ui-g-3"></div>
+				</div>
+			</p:fieldset>
+			<br />
+		</h:form>
+	</ui:define>
+</ui:composition>

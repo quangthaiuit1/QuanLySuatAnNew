@@ -458,7 +458,9 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 							DepartmentData departmentLevel2 = DepartmentDataService
 									.timtheoma(departmentTemp.getCodeDepart());
 							if (departmentLevel2 != null) {
-								if (departmentLevel2.getCode().equals("30005")) {
+								if (departmentLevel2.getCode().equals("30005")
+										|| departmentLevel2.getCode().equals("30015")
+										|| departmentLevel2.getCode().equals("30018")) {
 									cell.setCellValue(departmentTemp.getName());
 								} else {
 									cell.setCellValue(departmentLevel2.getName());
@@ -576,7 +578,9 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 									.timtheoma(departmentTemp.getCodeDepart());
 							if (departmentLevel2 != null) {
 								if (departmentLevel2 != null) {
-									if (departmentLevel2.getCode().equals("30005")) {
+									if (departmentLevel2.getCode().equals("30005")
+											|| departmentLevel2.getCode().equals("30015")
+											|| departmentLevel2.getCode().equals("30018")) {
 										cell.setCellValue(departmentTemp.getName());
 									} else {
 										cell.setCellValue(departmentLevel2.getName());
@@ -750,7 +754,8 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 				if (departmentTemp.getLevel() == 3) {
 					DepartmentData departmentLevel2 = DepartmentDataService.timtheoma(departmentTemp.getCodeDepart());
 					if (departmentLevel2 != null) {
-						if (departmentLevel2.getCode().equals("30005")) {
+						if (departmentLevel2.getCode().equals("30005") || departmentLevel2.getCode().equals("30015")
+								|| departmentLevel2.getCode().equals("30018")) {
 							cell.setCellValue(departmentTemp.getName());
 						} else {
 							cell.setCellValue(departmentLevel2.getName());
@@ -1472,7 +1477,8 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 					DepartmentData departmentLevel2 = DepartmentDataService.timtheoma(departmentTemp.getCodeDepart());
 					if (departmentLevel2 != null) {
 						if (departmentLevel2 != null) {
-							if (departmentLevel2.getCode().equals("30005")) {
+							if (departmentLevel2.getCode().equals("30005") || departmentLevel2.getCode().equals("30015")
+									|| departmentLevel2.getCode().equals("30018")) {
 								cell.setCellValue(departmentTemp.getName());
 							} else {
 								cell.setCellValue(departmentLevel2.getName());
@@ -1953,7 +1959,9 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 							DepartmentData departmentLevel2 = DepartmentDataService
 									.timtheoma(departmentTemp.getCodeDepart());
 							if (departmentLevel2 != null) {
-								if (departmentLevel2.getCode().equals("30005")) {
+								if (departmentLevel2.getCode().equals("30005")
+										|| departmentLevel2.getCode().equals("30015")
+										|| departmentLevel2.getCode().equals("30018")) {
 									cell.setCellValue(departmentTemp.getName());
 								} else {
 									cell.setCellValue(departmentLevel2.getName());
@@ -2073,7 +2081,9 @@ public class BaoCaoBean extends AbstractBean<OrderFood> {
 									DepartmentData departmentLevel2 = DepartmentDataService
 											.timtheoma(departmentTemp.getCodeDepart());
 									if (departmentLevel2 != null) {
-										if (departmentLevel2.getCode().equals("30005")) {
+										if (departmentLevel2.getCode().equals("30005")
+												|| departmentLevel2.getCode().equals("30015")
+												|| departmentLevel2.getCode().equals("30018")) {
 											cell2.setCellValue(departmentTemp.getName());
 										} else {
 											cell2.setCellValue(departmentLevel2.getName());
