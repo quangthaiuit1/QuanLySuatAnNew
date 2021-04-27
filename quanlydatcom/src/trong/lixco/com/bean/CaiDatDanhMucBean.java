@@ -14,6 +14,9 @@ import org.omnifaces.cdi.ViewScoped;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import trong.lixco.com.account.servicepublics.Member;
 import trong.lixco.com.bean.staticentity.MessageView;
 import trong.lixco.com.bean.staticentity.Notification;
@@ -220,14 +223,6 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 		this.categoryFoods = categoryFoods;
 	}
 
-	public Member getMember() {
-		return member;
-	}
-
-	public void setMember(Member member) {
-		this.member = member;
-	}
-
 	public List<CategoryFood> getCategoryFoodsFilter() {
 		return categoryFoodsFilter;
 	}
@@ -251,4 +246,5 @@ public class CaiDatDanhMucBean extends AbstractBean<CategoryFood> {
 	public void setcFoodUpdate(CategoryFood cFoodUpdate) {
 		this.cFoodUpdate = cFoodUpdate;
 	}
+
 }

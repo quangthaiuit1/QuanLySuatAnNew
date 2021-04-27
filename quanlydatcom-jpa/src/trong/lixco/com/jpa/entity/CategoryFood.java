@@ -12,12 +12,13 @@ public class CategoryFood extends AbstractEntity {
 	private byte[] image;
 	private String media_file_name;
 
-	public String getMedia_file_name() {
-		return media_file_name;
-	}
+	public String imageString() {
+		try {
+			return new String(Base64.getEncoder().encodeToString(image));
+		} catch (Exception e) {
+			return "";
+		}
 
-	public void setMedia_file_name(String media_file_name) {
-		this.media_file_name = media_file_name;
 	}
 
 	public String getName() {
@@ -36,12 +37,13 @@ public class CategoryFood extends AbstractEntity {
 		this.image = image;
 	}
 
-	public String imageString() {
-		try {
-			return new String(Base64.getEncoder().encodeToString(image));
-		} catch (Exception e) {
-			return "";
-		}
-
+	public String getMedia_file_name() {
+		return media_file_name;
 	}
+
+	public void setMedia_file_name(String media_file_name) {
+		this.media_file_name = media_file_name;
+	}
+	
+	
 }
